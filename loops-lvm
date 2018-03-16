@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# Antonio Petricca <antonio.petricca@gmail.com> - 09/03/2018
+
+PREREQ="lvm2"
+
+# Output pre-requisites
+
+prereqs()
+{
+    echo "$PREREQ"
+}
+
+case "$1" in
+    prereqs)
+        prereqs
+        exit 0
+    ;;
+esac
+
+. /scripts/functions
+
+_log_msg "Mounting LVM loop device(s) ...\n"
+
+LVM_LOOPS_HOST_DEV=""
+LVM_LOOPS_HOST_FSTYPE=""
+LVM_LOOPS_MASK=""
+MNT=/host
+
+for param in $(cat /proc/cmdline); do
+    case $param in
+        lvm_loops_host_dev=*)
+            LVM_LOOPS_HOST_DEV=${param#lvm_loops_host_dev=}
+        ;;
+
+        lvm_loops_host_fstype=*)
+            LVM_LOOPS_HOST_FSTYPE=${param#lvm_loops_host_fstype=}
+        ;;
+
+        lvm_loops_mask=*)
+            LVM_LOOPS_MASK=${param#lvm_loops_mask=}
+        ;;
+
+    esac
+done
+
+if [ "${LVM_LOOPS_HOST_DEV}" = "" ] || [ "${LVM_LOOPS_HOST_FSTYPE}" = "" ] || [ "${LVM_LOOPS_MASK}" = "" ]; then
+  log_warning_msg "One ore more arguments missing.LVM loops mount skipped."
+  exit 0
+fi
+
+HOST_DEV=$(/sbin/blkid -U ${LVM_LOOPS_HOST_DEV})
+_log_msg "Mounting LVM host \"${LVM_LOOPS_HOST_DEV}\" (${HOST_DEV}) ...\n"
+
+[ -d ${MNT} ] || mkdir ${MNT} || panic "Cannot create \"${MNT}\" mount point."
+mount -t ${LVM_LOOPS_HOST_FSTYPE} ${HOST_DEV} ${MNT} || panic "Cannot mount \"${LVM_LOOPS_HOST_DEV}\" host device."
+
+LOOPS="${MNT}/${LVM_LOOPS_MASK}"
+_log_msg "Setting up LVM loops \"${LOOPS}\" ...\n"
+
+for loop in ${LOOPS}; do
+
+  losetup -f $loop
+
+  if [ $? = 0 ]; then
+    log_success_msg "\"$loop\" setup."
+  else
+    panic "Cannot setup loop file \"$loop\"."
+  fi
+
+done
+
+_log_msg "Activate logical volumes...\n"
+
+vgchange -ay || panic "Cannot activate volume group."
+
+log_end_msg "Done"
