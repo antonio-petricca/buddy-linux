@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [[ $EUID > 0 ]]; then # we can compare directly with this syntax.
+  echo "Please run as root/sudo!"
+  exit 1
+fi
+
+if [ $# -lt 3 ]; then
+  echo "$(basename $0) [USB DEV] [USB BOOT PARTITION MOUNT POINT] [BACKUP FILE]"
+  exit 1
+fi
+
+read -p "Are you sure? (CTRL-C to exit)"
+
+DEV=$1
+MNT=$2
+BAK=$3
+ 
+   grub-install --force --removable --boot-directory=${MNT} ${DEV} \
+&& cd ${MNT} \
+&& rm -rf ${MNT}/* \
+&& tar xvf ${BAK} --strip-components=1 -C ${MNT}
+

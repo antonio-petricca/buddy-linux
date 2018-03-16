@@ -19,9 +19,12 @@ Insert a USB drive for OS booting and umount it
 
 ## Parameters
 
-	PARAM_BOOT_DEV=<<Eg: /dev/sdc>>
+Fit following parameters as you need:
+
+	PARAM_BOOT_DEV=/dev/sdc
 	PARAM_BOOT_PART=1
 	PARAM_HOST_UUID=$(blkid -s UUID -o value -t LABEL=OS)
+	PARAM_HOST_UUID_FSTYPE=ntfs
 	PARAM_LOOP_DIR=.linux-loops
 	PARAM_LOOP_SIZE=100
 	PARAM_LVM_VG=vg_system
@@ -29,7 +32,7 @@ Insert a USB drive for OS booting and umount it
 	PARAM_LVM_LV_SWAP=lv_swap
 	PARAM_LVM_LV_SWAP_SIZE=16G
 
-## Setup
+## Environment setup
 
 	BOOT_MNT=/mnt/boot
 	BOOT_PART=${PARAM_BOOT_DEV}${PARAM_BOOT_PART}
@@ -41,7 +44,7 @@ Insert a USB drive for OS booting and umount it
 	LVM_INITRAMFS_SCRIPT=${LVM_INITRAMFS_MNT}/etc/initramfs-tools/scripts/local-top/loops-lvm
 	LVM_LV_ROOT_DEV=/dev/${PARAM_LVM_VG}/${PARAM_LVM_LV_ROOT}
 
-## Loop file system
+## Loop file system setup
 
 	mkdir -p ${HOST_MNT}
 	mount ${HOST_UUID} ${HOST_MNT}
@@ -80,9 +83,16 @@ Insert a USB drive for OS booting and umount it
 	mount ${BOOT_PART} ${BOOT_MNT}
 	
 	mv ${LVM_INITRAMFS_MNT}/boot/* ${BOOT_MNT}
-	sync
+	
+## FSTAB update
 
-## Configure Grub
+	mkdir ${LVM_INITRAMFS_MNT}/host
+	
+	vi ${LVM_INITRAMFS_MNT}/etc/fstab
+	
+		add "<<${HOST_UUID}>>   /host   <<${PARAM_HOST_UUID_FSTYPE}>>    default 0   1"
+	
+## Grub configuration
 
 	vi ${BOOT_MNT}/grub/custom.cfg 
 
@@ -90,8 +100,8 @@ Customize it as follow:
 
 	set BOOT_PART=(hd0,msdos1)
 	set HOST_DEV=<<${PARAM_HOST_UUID}>>
+	set HOST_DEV_FSTYPE=<<${PARAM_HOST_UUID_FSTYPE}>>
 	set ROOT_DEV=<<${LVM_LV_ROOT_DEV}>>
-	set ROOT_DEV_FSTYPE=<<${LVM_LV_ROOT_DEV} fs type>>
 	
 	set LVM_LOOPS_MASK=<<${PARAM_LOOP_DIR}/${PARAM_LVM_VG}*.lvm>>
 	set MAX_LOOPS=32
@@ -115,7 +125,7 @@ Customize it as follow:
 	
 	    set root=${BOOT_PART}
 	
-	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${ROOT_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash
+	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash
 	    
 	    initrd /initrd.img-${KERN_VER}
 	}
@@ -129,7 +139,7 @@ Now insert your USB key, press ESC and select "**Loopback**" grub menu entry:
 
 	reboot
 
-## Update Grub
+## Grub update
 
 After rebooting...
 
@@ -155,6 +165,7 @@ After rebooting...
 ## Troubleshooting
 
 - If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
+- Schedule **backup-boot-usb-drive** to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
 
 ## Some references
 
