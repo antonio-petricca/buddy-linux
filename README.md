@@ -93,10 +93,18 @@ Fit following parameters as you need:
 		add "<<${HOST_UUID}>>   /host   <<${PARAM_HOST_UUID_FSTYPE}>>    default 0   1"
 	
 ## Grub configuration
+	
+Add settings to **grub.cfg** header:
 
+	vi ${BOOT_MNT}/grub/grub.cfg
+	
+	  - GRUB_DEFAULT="Loopback"
+	  - GRUB_TIMEOUT=10
+	  - GRUB_TIMEOUT_STYLE="menu"
+
+Customize **custom.cfg** with your own settings (<< ... >>):
+	  
 	vi ${BOOT_MNT}/grub/custom.cfg 
-
-Customize it as follow:
 
 	set BOOT_PART=(hd0,msdos1)
 	set HOST_DEV=<<${PARAM_HOST_UUID}>>
@@ -106,15 +114,9 @@ Customize it as follow:
 	set LVM_LOOPS_MASK=<<${PARAM_LOOP_DIR}/${PARAM_LVM_VG}*.lvm>>
 	set MAX_LOOPS=32
 	
-	menuentry 'Loopback' --class ubuntu --class gnu-linux --class gnu --class os {
-	    echo "Initializing environment..."
+	set KERN_VER=<<4.10.0-38-generic>>
 	
-	    set KERN_VER=4.10.0-38-generic
-	
-	    recordfail
-		load_video
-		gfxmode $linux_gfx_mode
-	
+	menuentry 'Loopback' --class ubuntu --class gnu-linux --class gnu --class os {s	
 	    echo "Loading modules..."
 	
 	    insmod ext2
@@ -126,6 +128,22 @@ Customize it as follow:
 	    set root=${BOOT_PART}
 	
 	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash
+	    
+	    initrd /initrd.img-${KERN_VER}
+	}
+	
+	menuentry 'Loopback (Recovery)' --class ubuntu --class gnu-linux --class gnu --class os {s	
+	    echo "Loading modules..."
+	
+	    insmod ext2
+	    insmod gzio
+	    insmod part_msdos
+	
+	    echo "Loading kernel..."
+	
+	    set root=${BOOT_PART}
+	
+	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash recovery nomodeset
 	    
 	    initrd /initrd.img-${KERN_VER}
 	}
@@ -148,7 +166,9 @@ After rebooting...
 	chmod -x /etc/grub.d/10*
 	
 	vi /etc/default/grub
-	  - set: GRUB_DEFAULT="Loopback"
+	  - GRUB_DEFAULT="Loopback"
+	  - GRUB_TIMEOUT=10
+	  - GRUB_TIMEOUT_STYLE="menu"
 	  
 	update-grub
 
