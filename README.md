@@ -19,7 +19,7 @@ Insert a USB drive for OS booting and umount it
 
 ## Parameters
 
-Fit following parameters as you need:
+Set following parameters as you need:
 
 	PARAM_BOOT_DEV=/dev/sdc
 	PARAM_BOOT_PART=1
@@ -41,7 +41,7 @@ Fit following parameters as you need:
 	LOOP_DEV=$(losetup -f)
 	LOOP_FILE=${HOST_MNT}/${PARAM_LOOP_DIR}/${PARAM_LVM_VG}0.lvm
 	LVM_INITRAMFS_MNT=/mnt/target
-	LVM_INITRAMFS_SCRIPT=${LVM_INITRAMFS_MNT}/etc/initramfs-tools/scripts/local-top/loops-lvm
+	LVM_INITRAMFS_SCRIPT=${LVM_INITRAMFS_MNT}/etc/initramfs-tools/scripts/local-top/lvm-loops-setup
 	LVM_LV_ROOT_DEV=/dev/${PARAM_LVM_VG}/${PARAM_LVM_LV_ROOT}
 
 ## Loop file system setup
@@ -75,7 +75,7 @@ Fit following parameters as you need:
 	mkdir -p ${LVM_INITRAMFS_MNT}
 	mount ${LVM_LV_ROOT_DEV} ${LVM_INITRAMFS_MNT}
 	
-	cp loops-lvm ${LVM_INITRAMFS_SCRIPT}
+	cp scripts/initramfs/lvm-loops-setup ${LVM_INITRAMFS_SCRIPT}
 	chmod +x ${LVM_INITRAMFS_SCRIPT}
 	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-initramfs -uv
 	
@@ -153,7 +153,7 @@ Customize **custom.cfg** with your own settings (<< ... >>):
 	sync
 	umount -a
 
-Now insert your USB key, press ESC and select "**Loopback**" grub menu entry:
+Now insert your USB key then:
 
 	reboot
 
