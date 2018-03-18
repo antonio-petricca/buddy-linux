@@ -20,7 +20,7 @@ esac
 
 . /scripts/functions
 
-_log_msg "Mounting LVM loop device(s) ...\n"
+_log_msg "Mounting LVM loop device(s)...\n"
 
 LVM_LOOPS_HOST_DEV=""
 LVM_LOOPS_HOST_FSTYPE=""

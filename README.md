@@ -1,6 +1,6 @@
 ## Introduction
 
-This guide will give you a fully detail instructions on how to install linux on
+This guide will give you detailed instructions on how to install linux on
 a LVM loopback disk booting from a USB drive (grub and boot partition) without
 have to change your PC internal disk boot sector.
 
@@ -41,7 +41,7 @@ Set following parameters as you need:
 	LOOP_DEV=$(losetup -f)
 	LOOP_FILE=${HOST_MNT}/${PARAM_LOOP_DIR}/${PARAM_LVM_VG}0.lvm
 	LVM_INITRAMFS_MNT=/mnt/target
-	LVM_INITRAMFS_SCRIPT=${LVM_INITRAMFS_MNT}/etc/initramfs-tools/scripts/local-top/lvm-loops-setup
+	LVM_INITRAMFS_SCRIPTS=${LVM_INITRAMFS_MNT}/etc/initramfs-tools/scripts/
 	LVM_LV_ROOT_DEV=/dev/${PARAM_LVM_VG}/${PARAM_LVM_LV_ROOT}
 
 ## Loop file system setup
@@ -75,22 +75,18 @@ Set following parameters as you need:
 	mkdir -p ${LVM_INITRAMFS_MNT}
 	mount ${LVM_LV_ROOT_DEV} ${LVM_INITRAMFS_MNT}
 	
-	cp scripts/initramfs/lvm-loops-setup ${LVM_INITRAMFS_SCRIPT}
-	chmod +x ${LVM_INITRAMFS_SCRIPT}
+	cp scripts/initramfs/lvm-loops-setup ${LVM_INITRAMFS_SCRIPTS}/local-top/
+	chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-top/*
+		
+	cp scripts/initramfs/lvm-loops-finalize ${LVM_INITRAMFS_SCRIPTS}/local-bottom/
+	chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-bottom/*
+	
 	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-initramfs -uv
 	
 	mkdir -p ${BOOT_MNT}
 	mount ${BOOT_PART} ${BOOT_MNT}
 	
 	mv ${LVM_INITRAMFS_MNT}/boot/* ${BOOT_MNT}
-	
-## FSTAB update
-
-	mkdir ${LVM_INITRAMFS_MNT}/host
-	
-	vi ${LVM_INITRAMFS_MNT}/etc/fstab
-	
-		add "<<${HOST_UUID}>>   /host   <<${PARAM_HOST_UUID_FSTYPE}>>    default 0   1"
 	
 ## Grub configuration
 	
