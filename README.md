@@ -184,15 +184,21 @@ In order to use the **restore-boot-usb-drive** tool you have to prepare a fresh 
 - If you wish, partition remaining space as FAT32.
 - Now run **restore-boot-usb-drive** to get help on its command line parameters.
 
-## Known issues
-
-- Unclean shutdown (mitigated by EXT4 journal recover).
-
 ## Troubleshooting
 
 - If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
 - Schedule **backup-boot-usb-drive** to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
 
+## Known issues
+
+- Unclean shutdown : mitigated by EXT4 journal recover (to be fixed).
+- Syslog error "blk_update_request: I/O error, dev loop**X**, sector **X**" : it disappears on kernel 4.13 or above.
+- Syslog error "print_req_error:: I/O error, dev loop**X**, sector **X**".
+
 ## Some references
 
 - https://unix.stackexchange.com/questions/61144/ensure-that-loopback-root-and-host-are-unmounted-on-shutdown
+- https://github.com/hakuna-m/wubiuefi/issues/16
+- https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b5dd2f6047ca108001328aac0e8588edd15f1778
+- https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
+- https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537

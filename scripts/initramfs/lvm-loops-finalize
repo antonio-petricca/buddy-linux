@@ -27,7 +27,7 @@ _log_msg "Moving LVM loops host device mount point from \"${MNT}\" to \"${ROOT_M
 
 mount -o remount,rw ${rootmnt} || panic "Cannot remount \"${rootmnt}\" R/W."
 
-[ -d ${ROOT_MNT} ] || mkdir -p ${ROOT_MNT} || panic "Cannot create \"${ROOT_MNT}\" mount point."
+[ -d ${ROOT_MNT} ] || (mkdir -p ${ROOT_MNT} && chmod 755 ${ROOT_MNT}) || panic "Cannot create \"${ROOT_MNT}\" mount point."
 
 mount -n -o move ${MNT} ${ROOT_MNT} || panic "Cannot move \"${MNT}\" to \"${ROOT_MNT}\"."
 
