@@ -174,6 +174,16 @@ After rebooting...
 
 ... now enjoy yourself **;)** ...
 
+## Restore boot USB drive to a new one
+
+In order to use the **restore-boot-usb-drive** tool you have to prepare a fresh USB drive:
+
+- Destroy all partitions.
+- Create a new 512Mb ext4 partition.
+- Flag it as BOOTable (else you will get an **"Invalid partition table"** warning at boot that you may skip by pressing ESC).
+- If you wish, partition remaining space as FAT32.
+- Now run **restore-boot-usb-drive** to get help on its command line parameters.
+
 ## Known issues
 
 - Unclean shutdown (mitigated by EXT4 journal recover).
