@@ -188,6 +188,8 @@ In order to use the **restore-boot-usb-drive** tool you have to prepare a fresh 
 
 - If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
 - Schedule **backup-boot-usb-drive** to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
+- You can install on MMC too (put **/dev/mmcblk0p1** on FSTAB as /
+**/boot**).
 
 ## Known issues
 
