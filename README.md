@@ -81,7 +81,7 @@ Set following parameters as you need:
 	cp scripts/initramfs/lvm-loops-finalize ${LVM_INITRAMFS_SCRIPTS}/local-bottom/
 	chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-bottom/*
 	
-	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-initramfs -uv
+	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-initramfs -uv -k all
 	
 	mkdir -p ${BOOT_MNT}
 	mount ${BOOT_PART} ${BOOT_MNT}
