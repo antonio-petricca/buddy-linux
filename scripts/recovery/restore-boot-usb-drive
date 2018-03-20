@@ -16,7 +16,7 @@ DEV=$1
 MNT=$2
 BAK=$3
  
-   grub-install --force --removable --boot-directory=${MNT} ${DEV} \
+   grub-install --force --boot-directory=${MNT} ${DEV} \
 && cd ${MNT} \
 && rm -rf ${MNT}/* \
 && tar xvf ${BAK} --strip-components=1 -C ${MNT}
