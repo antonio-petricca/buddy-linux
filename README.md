@@ -41,6 +41,7 @@ Set following parameters as you need:
 	LOOP_DEV=$(losetup -f)
 	LOOP_FILE=${HOST_MNT}/${PARAM_LOOP_DIR}/${PARAM_LVM_VG}0.lvm
 	LVM_TARGET_MNT=/mnt/target
+	LVM_INITRAMFS_CONF=${LVM_TARGET_MNT}/etc/initramfs-tools/conf.din
 	LVM_INITRAMFS_SCRIPTS=${LVM_TARGET_MNT}/etc/initramfs-tools/scripts
 	LVM_LOGROTATE_CONF=${LVM_TARGET_MNT}/etc/logrotate.d/rsyslog
 	LVM_RSYSLOG_CONF=${LVM_TARGET_MNT}/etc/rsyslog.d
@@ -82,6 +83,8 @@ Set following parameters as you need:
 		
 	cp scripts/initramfs/lvm-loops-finalize ${LVM_INITRAMFS_SCRIPTS}/local-bottom/
 	chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-bottom/*
+	
+	cp script/initramfs/compress ${LVM_INITRAMFS_CONF}
 	
 	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-initramfs -uv -k all
 	
@@ -126,8 +129,7 @@ Customize **custom.cfg** with your own settings (<< ... >>):
 	menuentry 'Loopback' --class ubuntu --class gnu-linux --class gnu --class os {s	
 	    echo "Loading modules..."
 	
-	    insmod ext2
-	    insmod gzio
+	    insmod xzio
 	    insmod part_msdos
 	
 	    echo "Loading kernel..."
@@ -143,8 +145,7 @@ Customize **custom.cfg** with your own settings (<< ... >>):
 	menuentry 'Loopback (Recovery)' --class ubuntu --class gnu-linux --class gnu --class os {s	
 	    echo "Loading modules..."
 	
-	    insmod ext2
-	    insmod gzio
+	    insmod xzio
 	    insmod part_msdos
 	
 	    echo "Loading kernel..."
