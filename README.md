@@ -40,8 +40,10 @@ Set following parameters as you need:
 	HOST_MNT=/mnt/host
 	LOOP_DEV=$(losetup -f)
 	LOOP_FILE=${HOST_MNT}/${PARAM_LOOP_DIR}/${PARAM_LVM_VG}0.lvm
-	LVM_INITRAMFS_MNT=/mnt/target
-	LVM_INITRAMFS_SCRIPTS=${LVM_INITRAMFS_MNT}/etc/initramfs-tools/scripts/
+	LVM_TARGET_MNT=/mnt/target
+	LVM_INITRAMFS_SCRIPTS=${LVM_TARGET_MNT}/etc/initramfs-tools/scripts
+	LVM_LOGROTATE_CONF=${LVM_TARGET_MNT}/etc/logrotate.d/rsyslog
+	LVM_RSYSLOG_CONF=${LVM_TARGET_MNT}/etc/rsyslog.d
 	LVM_LV_ROOT_DEV=/dev/${PARAM_LVM_VG}/${PARAM_LVM_LV_ROOT}
 
 ## Loop file system setup
@@ -88,6 +90,15 @@ Set following parameters as you need:
 	
 	mv ${LVM_INITRAMFS_MNT}/boot/* ${BOOT_MNT}
 	
+## Filter out loops error messages
+
+In order to keep your syslog file clean clean (please look at **Known issues** section) do:
+
+	cp scripts/rsyslog/30-loop-errors.conf ${LVM_RSYSLOG_CONF}
+	
+	vi ${LVM_LOGROTATE_CONF}:
+		- add "/var/log/loop-errors.log" to the log files list
+	
 ## Grub configuration
 	
 Add settings to **grub.cfg** header:
@@ -125,6 +136,7 @@ Customize **custom.cfg** with your own settings (<< ... >>):
 	
 	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash
 	    
+	    echo "Booting..."
 	    initrd /initrd.img-${KERN_VER}
 	}
 	
@@ -141,6 +153,7 @@ Customize **custom.cfg** with your own settings (<< ... >>):
 	
 	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash recovery nomodeset
 	    
+	    echo "Booting..."
 	    initrd /initrd.img-${KERN_VER}
 	}
 
@@ -186,21 +199,21 @@ In order to use the **restore-boot-usb-drive** tool you have to prepare a fresh 
 
 ## FAQ
 
-- If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
-- Schedule **backup-boot-usb-drive** to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
-- You can install on MMC too (put **/dev/mmcblk0p1** on FSTAB as /
-**/boot**).
+1. If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
+2. Schedule **backup-boot-usb-drive** to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
+3. You can install on MMC too (put **/dev/mmcblk0p1** on FSTAB as **/boot**).
 
 ## Known issues
 
-- Unclean shutdown : mitigated by EXT4 journal recover (to be fixed).
-- Syslog error "blk_update_request: I/O error, dev loop**X**, sector **X**" : it disappears on kernel 4.13 or above.
-- Syslog error "print_req_error:: I/O error, dev loop**X**, sector **X**".
+1. Unclean shutdown : mitigated by EXT4 journal recover (to be fixed).
+2. Syslog error "blk_update_request: I/O error, dev loop**X**, sector **X**" : it disappears on kernel 4.13 or above.
+3. Syslog error "print_req_error:: I/O error, dev loop**X**, sector **X**".
 
 ## Some references
 
-- https://unix.stackexchange.com/questions/61144/ensure-that-loopback-root-and-host-are-unmounted-on-shutdown
-- https://github.com/hakuna-m/wubiuefi/issues/16
-- https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b5dd2f6047ca108001328aac0e8588edd15f1778
-- https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
-- https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
+1. https://unix.stackexchange.com/questions/61144/ensure-that-loopback-root-and-host-are-unmounted-on-shutdown
+2. https://github.com/hakuna-m/wubiuefi/issues/16
+3. https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b5dd2f6047ca108001328aac0e8588edd15f1778
+4. https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
+5. https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
+sectio
