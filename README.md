@@ -132,7 +132,7 @@ Customize **custom.cfg** with your own settings (<< ... >>):
 	    insmod xzio
 	    insmod part_msdos
 	
-	    echo "Loading kernel..."
+	    echo "Loading kernel \"${KERN_VER}\"..."
 	
 	    set root=${BOOT_PART}
 	
@@ -148,7 +148,7 @@ Customize **custom.cfg** with your own settings (<< ... >>):
 	    insmod xzio
 	    insmod part_msdos
 	
-	    echo "Loading kernel..."
+	    echo "Loading kernel \"${KERN_VER}\"..."
 	
 	    set root=${BOOT_PART}
 	
@@ -208,7 +208,7 @@ In order to use the **restore-boot-usb-drive** tool you have to prepare a fresh 
 
 1. Unclean shutdown : mitigated by EXT4 journal recover (to be fixed).
 2. Syslog error "blk_update_request: I/O error, dev loop**X**, sector **X**" : it disappears on kernel 4.13 or above.
-3. Syslog error "print_req_error:: I/O error, dev loop**X**, sector **X**".
+3. Syslog error "print_req_error:: I/O error, dev loop**X**, sector **X**": get logged only once on kernel 4.15.
 
 ## Some references
 
@@ -218,3 +218,5 @@ In order to use the **restore-boot-usb-drive** tool you have to prepare a fresh 
 4. https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
 5. https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
 sectio
+6. https://github.com/madisongh/meta-tegra/issues/42
+7. https://www.thegeekstuff.com/2011/05/ext2-ext3-ext4/
