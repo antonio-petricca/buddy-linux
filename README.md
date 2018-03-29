@@ -209,6 +209,7 @@ In order to use the **restore-boot-usb-drive** tool you have to prepare a fresh 
 1. Unclean shutdown : mitigated by EXT4 journal recover (to be fixed).
 2. Syslog error "blk_update_request: I/O error, dev loop**X**, sector **X**" : it disappears on kernel 4.13 or above.
 3. Syslog error "print_req_error:: I/O error, dev loop**X**, sector **X**": get logged only once on kernel 4.15.
+4. LVM swap file causes a total system freeze on heavy memory load. After a lot of search and experimentation, the only workaround I have found is to create a standalone swap file hosted inside the same folder of the LVM loop files.
 
 ## Some references
 
