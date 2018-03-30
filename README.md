@@ -51,16 +51,16 @@ Set following parameters as you need:
 
 	mkdir -p ${HOST_MNT}
 	mount ${HOST_UUID} ${HOST_MNT}
-	
+
 	dd status=progress if=/dev/zero of=${LOOP_FILE} bs=1G count=${PARAM_LOOP_SIZE}
-	
+
 	losetup ${LOOP_DEV} ${LOOP_FILE}
-	
+
 	pvcreate -v ${LOOP_DEV}
 	vgcreate -v ${PARAM_LVM_VG} ${LOOP_DEV}
-	
+
 	lvcreate -v -L ${PARAM_LVM_LV_SWAP_SIZE} -n ${PARAM_LVM_LV_SWAP} ${PARAM_LVM_VG}
-	
+
 	lvcreate -v -l 100%FREE -n ${PARAM_LVM_LV_ROOT} ${PARAM_LVM_VG}
 
 ## Install
@@ -77,83 +77,83 @@ Set following parameters as you need:
 
 	mkdir -p ${LVM_INITRAMFS_MNT}
 	mount ${LVM_LV_ROOT_DEV} ${LVM_INITRAMFS_MNT}
-	
+
 	cp scripts/initramfs/lvm-loops-setup ${LVM_INITRAMFS_SCRIPTS}/local-top/
 	chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-top/*
-		
+
 	cp scripts/initramfs/lvm-loops-finalize ${LVM_INITRAMFS_SCRIPTS}/local-bottom/
 	chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-bottom/*
-	
+
 	cp script/initramfs/compress ${LVM_INITRAMFS_CONF}
-	
+
 	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-initramfs -uv -k all
-	
+
 	mkdir -p ${BOOT_MNT}
 	mount ${BOOT_PART} ${BOOT_MNT}
-	
+
 	mv ${LVM_INITRAMFS_MNT}/boot/* ${BOOT_MNT}
-	
+
 ## Filter out loops error messages
 
 In order to keep your syslog file clean clean (please look at **Known issues** section) do:
 
 	cp scripts/rsyslog/30-loop-errors.conf ${LVM_RSYSLOG_CONF}
-	
+
 	vi ${LVM_LOGROTATE_CONF}:
 		- add "/var/log/loop-errors.log" to the log files list
-	
+
 ## Grub configuration
-	
+
 Add settings to **grub.cfg** header:
 
 	vi ${BOOT_MNT}/grub/grub.cfg
-	
+
 	  - GRUB_DEFAULT="Loopback"
 	  - GRUB_TIMEOUT=10
 	  - GRUB_TIMEOUT_STYLE="menu"
 
 Customize **custom.cfg** with your own settings (<< ... >>):
-	  
-	vi ${BOOT_MNT}/grub/custom.cfg 
+
+	vi ${BOOT_MNT}/grub/custom.cfg
 
 	set BOOT_PART=(hd0,msdos1)
 	set HOST_DEV=<<${PARAM_HOST_UUID}>>
 	set HOST_DEV_FSTYPE=<<${PARAM_HOST_UUID_FSTYPE}>>
 	set ROOT_DEV=<<${LVM_LV_ROOT_DEV}>>
-	
+
 	set LVM_LOOPS_MASK=<<${PARAM_LOOP_DIR}/${PARAM_LVM_VG}*.lvm>>
 	set MAX_LOOPS=32
-	
+
 	set KERN_VER=<<4.10.0-38-generic>>
-	
-	menuentry 'Loopback' --class ubuntu --class gnu-linux --class gnu --class os {s	
+
+	menuentry 'Loopback' --class ubuntu --class gnu-linux --class gnu --class os {s
 	    echo "Loading modules..."
-	
+
 	    insmod xzio
 	    insmod part_msdos
-	
+
 	    echo "Loading kernel \"${KERN_VER}\"..."
-	
+
 	    set root=${BOOT_PART}
-	
+
 	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash
-	    
+
 	    echo "Booting..."
 	    initrd /initrd.img-${KERN_VER}
 	}
-	
-	menuentry 'Loopback (Recovery)' --class ubuntu --class gnu-linux --class gnu --class os {s	
+
+	menuentry 'Loopback (Recovery)' --class ubuntu --class gnu-linux --class gnu --class os {s
 	    echo "Loading modules..."
-	
+
 	    insmod xzio
 	    insmod part_msdos
-	
+
 	    echo "Loading kernel \"${KERN_VER}\"..."
-	
+
 	    set root=${BOOT_PART}
-	
+
 	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash recovery nomodeset
-	    
+
 	    echo "Booting..."
 	    initrd /initrd.img-${KERN_VER}
 	}
@@ -172,14 +172,14 @@ Now insert your USB key then:
 After rebooting...
 
 	sudo su -
-	
+
 	chmod -x /etc/grub.d/10*
-	
+
 	vi /etc/default/grub
 	  - GRUB_DEFAULT="Loopback"
 	  - GRUB_TIMEOUT=10
 	  - GRUB_TIMEOUT_STYLE="menu"
-	  
+
 	update-grub
 
 ## Finally start OS!
@@ -213,11 +213,15 @@ In order to use the **restore-boot-usb-drive** tool you have to prepare a fresh 
 
 ## Some references
 
-1. https://unix.stackexchange.com/questions/61144/ensure-that-loopback-root-and-host-are-unmounted-on-shutdown
-2. https://github.com/hakuna-m/wubiuefi/issues/16
-3. https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b5dd2f6047ca108001328aac0e8588edd15f1778
-4. https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
-5. https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537
-sectio
-6. https://github.com/madisongh/meta-tegra/issues/42
-7. https://www.thegeekstuff.com/2011/05/ext2-ext3-ext4/
+1. [blk_update_request: I/O error (1)](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537)
+- [blk_update_request: I/O error (2)](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537)
+- [blk_update_request: I/O error (3)](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537/comments/27)
+- [Block: loop: improve performance via blk-mq](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b5dd2f6047ca108001328aac0e8588edd15f1778)
+- [eMMC transfer speed significantly slower than stock u-boot](https://github.com/madisongh/meta-tegra/issues/42)
+- [Ensure that loopback root and host are unmounted on shutdown](https://unix.stackexchange.com/questions/61144/ensure-that-loopback-root-and-host-are-unmounted-on-shutdown)
+- [High load freezes ubuntu completely everytime](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1555351/comments/16)
+- [Hint: "blk_update_request: I/O error, dev loop0, sector xxxxxxxx" + freezing system (SSD) workaround?](https://github.com/hakuna-m/wubiuefi/issues/16)
+- [Kernel Hard Freezing Very Often](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/908335/comments/84)
+- [Linux File Systems: Ext2 vs Ext3 vs Ext4](https://www.thegeekstuff.com/2011/05/ext2-ext3-ext4/)
+- [System freeze on high memory usage](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1162073/comments/48)
+- [System freeze on high memory usage](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/159356/comments/71)
