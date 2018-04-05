@@ -7,8 +7,7 @@ have to change your PC internal disk boot sector.
 
 ## Conventions
 
-"<< ... >>" : provide your own data/parameter.
-
+"$${{ ... }}" : provide your own data/parameter.
 
 ## Pre-requisites
 
@@ -118,7 +117,7 @@ Add settings to **grub.cfg** header:
 
 Customize **${LVM_DEFAULT_CONF}/linux-on-loopback-usb.cfg** with your own settings (<< ... >>)...
 
-	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-grub -o ${BOOT_MNT}/grub
+	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-grub -o ${BOOT_MNT}/grub/grub.cfg
 
 ## Start your new OS
 
