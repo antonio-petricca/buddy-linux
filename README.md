@@ -41,6 +41,8 @@ Set following parameters as you need:
 	LOOP_DEV=$(losetup -f)
 	LOOP_FILE=${HOST_MNT}/${PARAM_LOOP_DIR}/${PARAM_LVM_VG}0.lvm
 	LVM_TARGET_MNT=/mnt/target
+	LVM_DEFAULT_CONF=${LVM_TARGET_MNT}/etc/default
+	LVM_GRUB_CONF=${LVM_TARGET_MNT}/etc/grub.d
 	LVM_INITRAMFS_CONF=${LVM_TARGET_MNT}/etc/initramfs-tools/conf.din
 	LVM_INITRAMFS_SCRIPTS=${LVM_TARGET_MNT}/etc/initramfs-tools/scripts
 	LVM_LOGROTATE_CONF=${LVM_TARGET_MNT}/etc/logrotate.d/rsyslog
@@ -106,57 +108,17 @@ In order to keep your syslog file clean clean (please look at **Known issues** s
 
 Add settings to **grub.cfg** header:
 
-	vi ${BOOT_MNT}/grub/grub.cfg
+	vi ${LVM_DEFAULT_CONF}/grub
 
-	  - GRUB_DEFAULT="Loopback"
 	  - GRUB_TIMEOUT=10
 	  - GRUB_TIMEOUT_STYLE="menu"
 
-Customize **custom.cfg** with your own settings (<< ... >>):
+	cp scripts/grub/linux-on-loopback-usb.cfg ${LVM_DEFAULT_CONF}
+	cp scripts/grub/10_linux-on-loopback-usb ${LVM_GRUB_CONF}
 
-	vi ${BOOT_MNT}/grub/custom.cfg
+Customize **${LVM_DEFAULT_CONF}/linux-on-loopback-usb.cfg** with your own settings (<< ... >>)...
 
-	set BOOT_PART=(hd0,msdos1)
-	set HOST_DEV=<<${PARAM_HOST_UUID}>>
-	set HOST_DEV_FSTYPE=<<${PARAM_HOST_UUID_FSTYPE}>>
-	set ROOT_DEV=<<${LVM_LV_ROOT_DEV}>>
-
-	set LVM_LOOPS_MASK=<<${PARAM_LOOP_DIR}/${PARAM_LVM_VG}*.lvm>>
-	set MAX_LOOPS=32
-
-	set KERN_VER=<<4.10.0-38-generic>>
-
-	menuentry 'Loopback' --class ubuntu --class gnu-linux --class gnu --class os {s
-	    echo "Loading modules..."
-
-	    insmod xzio
-	    insmod part_msdos
-
-	    echo "Loading kernel \"${KERN_VER}\"..."
-
-	    set root=${BOOT_PART}
-
-	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash
-
-	    echo "Booting..."
-	    initrd /initrd.img-${KERN_VER}
-	}
-
-	menuentry 'Loopback (Recovery)' --class ubuntu --class gnu-linux --class gnu --class os {s
-	    echo "Loading modules..."
-
-	    insmod xzio
-	    insmod part_msdos
-
-	    echo "Loading kernel \"${KERN_VER}\"..."
-
-	    set root=${BOOT_PART}
-
-	    linux  /vmlinuz-${KERN_VER} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ro verbose nosplash recovery nomodeset
-
-	    echo "Booting..."
-	    initrd /initrd.img-${KERN_VER}
-	}
+	chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-grub -o ${BOOT_MNT}/grub
 
 ## Start your new OS
 

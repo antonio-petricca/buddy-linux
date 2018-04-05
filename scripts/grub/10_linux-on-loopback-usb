@@ -1,0 +1,102 @@
+#!/bin/sh
+
+. /usr/share/grub/grub-mkconfig_lib
+. /etc/default/grub.d/linux-on-loopback-usb.cfg
+
+# Get kernels list
+
+KERNELS=$(for file in /boot/vmlinuz-* /vmlinuz-* /boot/kernel-* ; do
+  if grub_file_is_not_garbage "${file}" ; then echo -n "${file} " ; fi
+done)
+
+# Set default
+
+latest_kernel=$(version_find_latest ${KERNELS} | sed -e "s,^[^0-9]*-,,g")
+
+cat <<EOF
+set default="Loopback (${latest_kernel})"
+EOF
+
+echo "Default loopback kernel will be \"${latest_kernel}\"." 1>&2
+
+# Adding entries
+
+for kernel in ${KERNELS}; do
+
+  KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
+  echo "Found loopback kernel \"${KERNEL}\"." 1>&2
+
+cat <<EOF
+
+menuentry 'Loopback (${KERNEL})' --class gnu-linux --class gnu --class os {
+  echo "Loading modules..."
+
+  insmod xzio
+  insmod part_msdos
+
+  echo "Loading kernel \"${KERNEL}\"..."
+
+  set root=${BOOT_PART}
+
+  linux  /vmlinuz-${KERNEL} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS}
+
+  echo "Booting..."
+  initrd /initrd.img-${KERNEL}
+}
+EOF
+
+done
+
+# Loopback recovery
+
+if [ ${WANT_RECOVERY} = 1 ]; then
+
+echo "Adding loopback recovery kernel \"${latest_kernel}\"." 1>&2
+
+cat <<EOF
+
+menuentry 'Loopback (Recovery)' --class gnu-linux --class gnu --class os {
+  echo "Loading modules..."
+
+  insmod xzio
+  insmod part_msdos
+
+  echo "Loading kernel \"${latest_kernel}\"..."
+
+  set root=${BOOT_PART}
+
+  linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} recovery nomodeset
+
+  echo "Booting recovery..."
+  initrd /initrd.img-${latest_kernel}
+}
+EOF
+
+fi
+
+# Net console
+
+if [ ! -z "${NET_CONSOLE}" ]; then
+
+echo "Adding loopback net console kernel \"${latest_kernel}\"." 1>&2
+
+cat <<EOF
+
+menuentry 'Loopback (NetConsole)' --class gnu-linux --class gnu --class os {
+  echo "Loading modules..."
+
+  insmod xzio
+  insmod part_msdos
+
+  echo "Loading kernel \"${latest_kernel}\"..."
+
+  set root=${BOOT_PART}
+
+  linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} ${NET_CONSOLE}
+
+  echo "Booting with net console..."
+  initrd /initrd.img-${latest_kernel}
+}
+EOF
+
+fi
