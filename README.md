@@ -150,6 +150,7 @@ In order to use the `restore-boot-usb-drive` tool you have to prepare a fresh US
 1. If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
 2. Schedule `backup-boot-usb-drive` to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
 3. You can install on MMC too (put **/dev/mmcblk0p1** on FSTAB as **/boot**).
+4. If you host your loopback files on a NTFS volume you can gain performances by setting `HOST_DEV_FSOPTIONS=noatime,async,big_writes` inside **linux-on-loopback-usb.cfg**. 
 
 ## Known issues
 
