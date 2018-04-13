@@ -1,2 +1,6 @@
-COMPRESS=xz
+# https://askubuntu.com/questions/299396/how-to-reduce-the-size-of-initrd-img-on-ubuntu-13-04
+
+#COMPRESS=xz
+COMPRESS=lzma2
+
 #MODULES=dep 

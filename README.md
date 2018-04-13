@@ -160,15 +160,21 @@ In order to use the `restore-boot-usb-drive` tool you have to prepare a fresh US
 
 ## Some references
 
-1. [blk_update_request: I/O error (1)](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537)
+- [Back to “initramfs” on Debian by systemd “shutdown to initramfs” feature](https://unix.stackexchange.com/questions/436707/back-to-initramfs-on-debian-by-systemd-shutdown-to-initramfs-feature)
+- [blk_update_request: I/O error (1)](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537)
 - [blk_update_request: I/O error (2)](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537)
 - [blk_update_request: I/O error (3)](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1526537/comments/27)
 - [Block: loop: improve performance via blk-mq](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b5dd2f6047ca108001328aac0e8588edd15f1778)
+- [Clean shutdown with systemd](http://www.slax.org/blog/24229-Clean-shutdown-with-systemd.html)
+- [Bug#778849: Support restoring initrd on shutdown and pivoting into it](https://lists.debian.org/debian-kernel/2017/04/msg00079.html)
+- [dracut-shutdown.service](http://manpages.ubuntu.com/manpages/bionic/man8/dracut-shutdown.service.8.html)
 - [eMMC transfer speed significantly slower than stock u-boot](https://github.com/madisongh/meta-tegra/issues/42)
 - [Ensure that loopback root and host are unmounted on shutdown](https://unix.stackexchange.com/questions/61144/ensure-that-loopback-root-and-host-are-unmounted-on-shutdown)
 - [High load freezes ubuntu completely everytime](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1555351/comments/16)
 - [Hint: "blk_update_request: I/O error, dev loop0, sector xxxxxxxx" + freezing system (SSD) workaround?](https://github.com/hakuna-m/wubiuefi/issues/16)
 - [Kernel Hard Freezing Very Often](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/908335/comments/84)
 - [Linux File Systems: Ext2 vs Ext3 vs Ext4](https://www.thegeekstuff.com/2011/05/ext2-ext3-ext4/)
+- [systemd shutdown: switch-root after remounting root fs ro](https://lists.freedesktop.org/archives/systemd-devel/2015-December/035218.html)
 - [System freeze on high memory usage](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1162073/comments/48)
 - [System freeze on high memory usage](https://bugs.launchpad.net/ubuntu/+source/linux/+bug/159356/comments/71)
+- [The initrd Interface of systemd](https://www.freedesktop.org/wiki/Software/systemd/InitrdInterface/)

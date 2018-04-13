@@ -38,7 +38,7 @@ menuentry 'Loopback (${KERNEL})' --class gnu-linux --class gnu --class os {
 
   set root=${BOOT_PART}
 
-  linux  /vmlinuz-${KERNEL} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS}
+  linux  /vmlinuz-${KERNEL} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_host_fsoptions=${HOST_DEV_FSOPTIONS} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS}
 
   echo "Booting..."
   initrd /initrd.img-${KERNEL}
@@ -65,7 +65,7 @@ menuentry 'Loopback (Recovery)' --class gnu-linux --class gnu --class os {
 
   set root=${BOOT_PART}
 
-  linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} recovery nomodeset
+  linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_host_fsoptions=${HOST_DEV_FSOPTIONS} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} recovery nomodeset
 
   echo "Booting recovery..."
   initrd /initrd.img-${latest_kernel}
@@ -92,7 +92,7 @@ menuentry 'Loopback (NetConsole)' --class gnu-linux --class gnu --class os {
 
   set root=${BOOT_PART}
 
-  linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} ${NET_CONSOLE}
+  linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_host_fsoptions=${HOST_DEV_FSOPTIONS} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} ${NET_CONSOLE}
 
   echo "Booting with net console..."
   initrd /initrd.img-${latest_kernel}

@@ -23,6 +23,7 @@ esac
 _log_msg "Mounting LVM loop device(s)...\n"
 
 LVM_LOOPS_HOST_DEV=""
+LVM_LOOPS_HOST_FSOPTIONS=""
 LVM_LOOPS_HOST_FSTYPE=""
 LVM_LOOPS_MASK=""
 MNT=/host
@@ -31,6 +32,10 @@ for param in $(cat /proc/cmdline); do
     case $param in
         lvm_loops_host_dev=*)
             LVM_LOOPS_HOST_DEV=${param#lvm_loops_host_dev=}
+        ;;
+
+        lvm_loops_host_fsoptions=*)
+            LVM_LOOPS_HOST_FSOPTIONS=${param#lvm_loops_host_fsoptions=}
         ;;
 
         lvm_loops_host_fstype=*)
@@ -54,6 +59,10 @@ _log_msg "Mounting LVM host \"${LVM_LOOPS_HOST_DEV}\" (${HOST_DEV}) ...\n"
 
 [ -d ${MNT} ] || mkdir ${MNT} || panic "Cannot create \"${MNT}\" mount point."
 mount -t ${LVM_LOOPS_HOST_FSTYPE} ${HOST_DEV} ${MNT} || panic "Cannot mount \"${LVM_LOOPS_HOST_DEV}\" host device."
+
+if [ ! -z "${LVM_LOOPS_HOST_FSOPTIONS}" ]; then
+  mount -o remount,${LVM_LOOPS_HOST_FSOPTIONS} ${MNT} || panic "Cannot re-mount \"${LVM_LOOPS_HOST_DEV}\" host device with options."
+fi
 
 LOOPS="${MNT}/${LVM_LOOPS_MASK}"
 _log_msg "Setting up LVM loops \"${LOOPS}\" ...\n"
