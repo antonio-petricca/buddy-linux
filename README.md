@@ -79,14 +79,14 @@ ubiquity &
   - ${BOOT_PART} ext4 512Mb @ "/boot"
   - ${PARAM_LVM_LV_ROOT} @ "/"
   - ${PARAM_LVM_LV_SWAP} @ "swap"
-  - Click on "Continue testing"
+  - Click on "Install Now"
 ```
 
 ## Init RAM FS scripting
 
 ```
-mkdir -p ${LVM_INITRAMFS_MNT}
-mount ${LVM_LV_ROOT_DEV} ${LVM_INITRAMFS_MNT}
+mkdir -p ${LVM_TARGET_MNT}
+mount ${LVM_LV_ROOT_DEV} ${LVM_TARGET_MNT}
 
 cp scripts/initramfs/lvm-loops-setup ${LVM_INITRAMFS_SCRIPTS}/local-top/
 chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-top/*
@@ -94,14 +94,14 @@ chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-top/*
 cp scripts/initramfs/lvm-loops-finalize ${LVM_INITRAMFS_SCRIPTS}/local-bottom/
 chmod +x ${LVM_INITRAMFS_SCRIPTS}/local-bottom/*
 
-cp script/initramfs/compress ${LVM_INITRAMFS_CONF}
+cp scripts/initramfs/compress ${LVM_INITRAMFS_CONF}
 
-chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-initramfs -uv -k all
+chroot ${LVM_TARGET_MNT} /usr/sbin/update-initramfs -uv -k all
 
 mkdir -p ${BOOT_MNT}
 mount ${BOOT_PART} ${BOOT_MNT}
 
-mv ${LVM_INITRAMFS_MNT}/boot/* ${BOOT_MNT}
+mv ${LVM_TARGET_MNT}/boot/* ${BOOT_MNT}
 ```
 
 ## Filter out loops error messages
@@ -122,17 +122,29 @@ Add settings to **grub.cfg** header:
   - Set `GRUB_TIMEOUT=10`
   - Set `GRUB_TIMEOUT_STYLE="menu"`
 
-- `cp scripts/grub/linux-on-loopback-usb.cfg ${LVM_DEFAULT_CONF}`
+- `cp scripts/grub/linux-on-loopback-usb.cfg ${LVM_DEFAULT_CONF}/grub.d`
 - `cp scripts/grub/10_linux-on-loopback-usb ${LVM_GRUB_CONF}`
 
-Customize `${LVM_DEFAULT_CONF}/linux-on-loopback-usb.cfg` with your own settings (`$${{ ... }}`)...
+Customize `${LVM_DEFAULT_CONF}/grub.d/linux-on-loopback-usb.cfg` with your own settings (`$${{ ... }}`)...
 
-- `chroot ${LVM_INITRAMFS_MNT} /usr/sbin/update-grub -o ${BOOT_MNT}/grub/grub.cfg`
+```
+mount --bind /dev ${LVM_TARGET_MNT}/dev
+mount --bind /sys ${LVM_TARGET_MNT}/sys
+mount --bind /proc ${LVM_TARGET_MNT}/proc
+mount --bind ${BOOT_MNT} ${LVM_TARGET_MNT}/boot
+
+chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub
+
+umount ${LVM_TARGET_MNT}/dev
+umount ${LVM_TARGET_MNT}/sys
+umount ${LVM_TARGET_MNT}/proc
+umount ${LVM_TARGET_MNT}/boot
+
+```
 
 ## Finally start Linux on USB
 
 - `sync`
-- `umount -a`
 - `reboot`
 
 ## Restore boot USB drive to a new one
@@ -150,7 +162,7 @@ In order to use the `restore-boot-usb-drive` tool you have to prepare a fresh US
 1. If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
 2. Schedule `backup-boot-usb-drive` to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
 3. You can install on MMC too (put **/dev/mmcblk0p1** on FSTAB as **/boot**).
-4. If you host your loopback files on a NTFS volume you can gain performances by setting `HOST_DEV_FSOPTIONS=noatime,async,big_writes` inside **linux-on-loopback-usb.cfg**. 
+4. If you host your loopback files on a NTFS volume you can gain performances by setting `HOST_DEV_FSOPTIONS=noatime,async,big_writes` inside **linux-on-loopback-usb.cfg**.
 
 ## Known issues
 
