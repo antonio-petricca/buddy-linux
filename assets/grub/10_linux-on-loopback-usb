@@ -13,7 +13,7 @@ done)
 
 latest_kernel=$(version_find_latest ${KERNELS} | sed -e "s,^[^0-9]*-,,g")
 
-cat <<EOF
+cat << EOF
 set default="Loopback (${latest_kernel})"
 EOF
 
@@ -26,7 +26,7 @@ for kernel in ${KERNELS}; do
   KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
   echo "Found loopback kernel \"${KERNEL}\"." 1>&2
 
-cat <<EOF
+cat << EOF
 
 menuentry 'Loopback (${KERNEL})' --class gnu-linux --class gnu --class os {
   echo "Loading modules..."
@@ -53,7 +53,7 @@ if [ ${WANT_RECOVERY} = 1 ]; then
 
 echo "Adding loopback recovery kernel \"${latest_kernel}\"." 1>&2
 
-cat <<EOF
+cat << EOF
 
 menuentry 'Loopback (Recovery)' --class gnu-linux --class gnu --class os {
   echo "Loading modules..."
@@ -68,7 +68,7 @@ menuentry 'Loopback (Recovery)' --class gnu-linux --class gnu --class os {
   linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_host_fsoptions=${HOST_DEV_FSOPTIONS} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} recovery nomodeset
 
   echo "Booting recovery..."
-  initrd /initrd.img-${latest_kernel}
+  initrd /initrd.img-${KERNEL}
 }
 EOF
 
@@ -80,7 +80,7 @@ if [ ! -z "${NET_CONSOLE}" ]; then
 
 echo "Adding loopback net console kernel \"${latest_kernel}\"." 1>&2
 
-cat <<EOF
+cat << EOF
 
 menuentry 'Loopback (NetConsole)' --class gnu-linux --class gnu --class os {
   echo "Loading modules..."

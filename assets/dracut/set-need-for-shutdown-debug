@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# https://www.systutorials.com/docs/linux/man/8-dracut-shutdown/
+
+mkdir -p /run/initramfs/etc/cmdline.d && \
+echo "rd.break=pre-shutdown rd.shell" > /run/initramfs/etc/cmdline.d/debug.conf \\ &
+touch /run/initramfs/.need_shutdown

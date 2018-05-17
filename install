@@ -1,0 +1,969 @@
+#!/bin/bash
+
+# Common routines
+
+function bindFolder {
+    local SOURCE=$1
+    local TARGET=$2
+
+    mount --bind ${SOURCE} ${TARGET} || exitInstall
+    printInfo " - Bound \"${SOURCE}\" to \"${TARGET}\"."
+}
+
+function canRun {
+    if [ ${PARAM_RESUME_LINENO} -eq 0 ] || [ ${BASH_LINENO[0]} -ge ${PARAM_RESUME_LINENO} ]; then
+        true
+    else
+        printInfo " - Skipped block execution at line ${BASH_LINENO[0]}."
+        false
+    fi
+}
+
+function createFolder {
+    local FOLDER=$1
+
+    mkdir -p ${FOLDER} > /dev/null || exitInstall
+    printInfo " - Created folder \"${FOLDER}\"."
+}
+
+function exitInstall {
+    EXIT_CODE=$?
+    ERROR_LINE=${BASH_LINENO[0]}
+
+    printInfo ""
+
+    {
+        printInfo "Installation aborted at line ${ERROR_LINE}."
+
+        if [ ${RESUME_LINENO} -gt 0 ]; then
+            printInfo "You may fix the problem and resume the installation by adding \"--resume ${RESUME_LINENO}\"."
+        fi
+    } | boxes -d shell -i none
+
+    exit ${EXIT_CODE}
+}
+
+function mountDevice {
+    local DEVICE=$1
+    local FOLDER=$2
+
+    mount ${DEVICE} ${FOLDER} > /dev/null || exitInstall
+    printInfo " - Mounted device \"${DEVICE}\" to \"${FOLDER}\"."
+}
+
+function printError {
+    echo -e "$@" >&2
+}
+
+function printInfo {
+    echo -e "$@" >&1
+}
+
+function printPerforming {
+    printInfo "\nPerforming \"${FUNCNAME[1]}\"...\n"
+}
+
+function saveResumeCheckPoint {
+    RESUME_LINENO=${BASH_LINENO[0]}
+}
+
+function unbindFolder {
+    local FOLDER=$1
+
+    if mountpoint -q ${FOLDER}; then
+        umount ${FOLDER} > /dev/null || exitInstall
+        printInfo " - Unbound folder \"${FOLDER}\"."
+    fi
+}
+
+function umountFolder {
+    local FOLDER=$1
+
+    if mountpoint -q ${FOLDER}; then
+        umount ${FOLDER} > /dev/null || exitInstall
+        printInfo " - Unmounted folder \"${FOLDER}\"."
+    fi
+}
+
+function removeFolder {
+    local FOLDER=$1
+
+    rm -rf ${FOLDER} > /dev/null || exitInstall
+    printInfo " - Removed folder \"${FOLDER}\"."
+}
+
+# Parse arguments
+
+PARAM_CLEAN=0
+PARAM_RESUME_LINENO=0
+PARAM_INITRD_TOOL=2
+
+PARAM_BOOT_DEV=
+PARAM_BOOT_PART=1
+PARAM_HOST_UUID=
+PARAM_HOST_FSTYPE=ntfs-3g
+PARAM_HOST_FSOPTIONS=noatime
+PARAM_LOOP_DIR=.linux-loops
+PARAM_LOOP_SIZE=0
+PARAM_LVM_VG=vg_system
+PARAM_LVM_LV_ROOT=lv_root
+PARAM_SWAP_FILE=swap.raw
+PARAM_SWAP_SIZE=0
+
+function showHelp {
+    printInfo "Synopsis:\n"
+    printInfo "  $(basename $0) [OPTIONS]\n"
+    printInfo "    Executive arguments:\n"
+    printInfo "      -h | --help                 : this screen."
+    printInfo "      -c | --clean                : clean already performed steps."
+    printInfo "      -r | --resume               : resume execution from a given line number."
+    printInfo ""
+    printInfo "    Mandatory arguments:\n"
+    printInfo "      -b | --boot-device          : boot (USB) device (eg: /dev/sdc)."
+    printInfo "      -u | --host-uuid            : loop files host device UUID (got by blkid)."
+    printInfo "      -f | --host-fs-type         : host device filesystem type (default: \"${PARAM_HOST_FSTYPE}\")."
+    printInfo "      -s | --loopback-file-size   : loopback main file size (in Gigabytes)."
+    printInfo "      -w | --swap-file-size       : swap file size (in Gigabytes)."
+    printInfo ""
+    printInfo "    Optional arguments:\n"
+    printInfo "      -p | --boot-partition-index : boot partition index (default: ${PARAM_BOOT_PART})."
+    printInfo "      -i | --initrd-tool          : IniRD tools => 1 = initramfs-tools, 2 = dracut (default: ${PARAM_INITRD_TOOL})."
+    printInfo "      -o | --host-fs-options      : host device filesystem options (default: \"${PARAM_HOST_FSOPTIONS}\")."
+    printInfo "      -d | --loops-dir            : host device loopback files root relative folder (default: \"${PARAM_LOOP_DIR}\")."
+    printInfo "      -v | --volume-group-name    : volume group name (default: \"${PARAM_LVM_VG}\")."
+    printInfo "      -l | --logical-volume-name  : root logical volume name (default: \"${PARAM_LVM_LV_ROOT}\")."
+}
+
+function parseOptions {
+
+    if [ $# -eq 0 ]; then
+        showHelp
+        exit 1
+    fi
+
+    GET_OPT=$(getopt -o -hi::b::p::u::f::o::d::s::w::r::v::l::c --long help,initrd-tool::,boot-device::,boot-partition-index::,host-uuid::,host-fs-type::,host-fs-options::,loops-dir::,loopback-file-size::,swap-file-size::,resume::,volume-group-name,logical-volume-name,clean -- "$@" 2>&1 1>/dev/null)
+    EXIT_CODE=$?
+
+    if [ ${EXIT_CODE} != 0 ]; then
+        printError "Arguments parsing error(s):"
+        printError "$(echo "${GET_OPT}" | sed -e 's/getopt: / - /')"
+        exit $?
+    fi
+
+    while true; do
+        case "$1" in
+            -b | --boot-device )
+                PARAM_BOOT_DEV=$2
+                shift 2
+            ;;
+
+            -c | --clean )
+                PARAM_CLEAN=1
+                shift
+            ;;
+
+            -d | --loops-dir )
+                if [ ! -z "$2" ]; then
+                    PARAM_LOOP_DIR=$2
+                    shift 2
+                else
+                    printError "Missing host loopback files folder."
+                    exit 1
+                fi
+            ;;
+
+            -f | --host-fs-type )
+                if [ ! -z "$2" ]; then
+                    PARAM_HOST_FSTYPE=$2
+                    shift 2
+                else
+                    printError "Missing host UUID."
+                    exit 1
+                fi
+            ;;
+
+            -h | --help )
+                showHelp
+                exit 1
+            ;;
+
+            -i | --initrd-tool )
+                case $2 in
+                    [1-2] )
+                        PARAM_INITRD_TOOL=$2
+                        shift 2
+                    ;;
+
+                    * )
+                        printError "Invalid InitRD tool ($2)."
+                        exit 1
+                    ;;
+                esac
+            ;;
+
+            -l | --logical-volume-name )
+                if [ ! -z "$2" ]; then
+                    PARAM_LVM_LV_ROOT=$2
+                    shift 2
+                else
+                    printError "Missing root logical volume name."
+                    exit 1
+                fi
+            ;;
+
+            -o | --host-fs-options )
+                PARAM_HOST_FSOPTIONS=$2
+                shift 2
+            ;;
+
+            -p | --boot-partition-index )
+                case $2 in
+                    [0-9]* )
+                        PARAM_BOOT_PART=$2
+                        shift 2
+                    ;;
+
+                    * )
+                        printError "Invalid boot partition index ($2)."
+                        exit 1
+                    ;;
+                esac
+            ;;
+
+            -r | --resume )
+                case $2 in
+                    [0-9]* )
+                        PARAM_RESUME_LINENO=$2
+                        shift 2
+                    ;;
+
+                    * )
+                        printError "Invalid resume line number ($2)."
+                        exit 1
+                    ;;
+                esac
+            ;;
+
+            -s | --loopback-file-size )
+                case $2 in
+                    [0-9]* )
+                        PARAM_LOOP_SIZE=$2
+                        shift 2
+                    ;;
+
+                    * )
+                        printError "Invalid main loopback file size ($2)."
+                        exit 1
+                    ;;
+                esac
+            ;;
+
+            -u | --host-uuid )
+                if [ ! -z "$2" ]; then
+                    PARAM_HOST_UUID=$2
+                    shift 2
+                else
+                    printError "Missing host UUID."
+                    exit 1
+                fi
+            ;;
+
+            -v | --volume-group-name )
+                if [ ! -z "$2" ]; then
+                    PARAM_LVM_VG=$2
+                    shift 2
+                else
+                    printError "Missing volume group name."
+                    exit 1
+                fi
+            ;;
+
+            -w | --swap-file-size )
+                case $2 in
+                    [0-9]* )
+                        PARAM_SWAP_SIZE=$2
+                        shift 2
+                    ;;
+
+                    * )
+                        printError "Invalid swap file size ($2)."
+                        exit 1
+                    ;;
+                esac
+            ;;
+
+            * )
+            break
+            ;;
+        esac
+    done
+
+    if [ ${PARAM_CLEAN} -eq 1 ]; then
+        PARAM_RESUME_LINENO=0 # Force restart
+    fi
+}
+
+parseOptions $@
+
+# Environment setup
+
+CURRENT_DIR=$(readlink -f $(dirname $0))
+RESUME_LINENO=0
+
+BOOT_MNT=/mnt/boot
+BOOT_PART=${PARAM_BOOT_DEV}${PARAM_BOOT_PART}
+HOST_UUID=UUID=${PARAM_HOST_UUID}
+HOST_MNT=/mnt/host
+LOOP_DEV=$(losetup -f)
+LOOP_DIR=${HOST_MNT}/${PARAM_LOOP_DIR}
+LOOP_FILE=${LOOP_DIR}/${PARAM_LVM_VG}0.lvm
+LOOP_SIZE=$((PARAM_LOOP_SIZE * 1000))
+LOOP_MAX=$(ls -1l /dev/loop* | grep -E '^b.*' | awk '{ print $6 }' | sort -r | head -1)
+SWAP_FILE=${LOOP_DIR}/${PARAM_SWAP_FILE}
+SWAP_SIZE=$((PARAM_SWAP_SIZE * 1000))
+LVM_TARGET_MNT=/mnt/target
+LVM_DEFAULT_CONF=${LVM_TARGET_MNT}/etc/default
+LVM_GRUB_CONF=${LVM_TARGET_MNT}/etc/grub.d
+LVM_DRACUT_CONF=${LVM_TARGET_MNT}/etc/dracut.conf.d
+LVM_DRACUT_MODULES=${LVM_TARGET_MNT}/usr/lib/dracut/modules.d
+LVM_INITRAMFS_CONF=${LVM_TARGET_MNT}/etc/initramfs-tools/conf.din
+LVM_INITRAMFS_SCRIPTS=${LVM_TARGET_MNT}/etc/initramfs-tools/scripts
+LVM_LOGROTATE_CONF=${LVM_TARGET_MNT}/etc/logrotate.d
+LVM_RSYSLOG_CONF=${LVM_TARGET_MNT}/etc/rsyslog.d
+LVM_LV_ROOT_DEV=/dev/${PARAM_LVM_VG}/${PARAM_LVM_LV_ROOT}
+
+# Pre-requisites check
+
+function checkPreRequisites {
+    if [[ $EUID > 0 ]]; then
+        printError "Please run as root/sudo!"
+        exit 1
+    fi
+
+    if [ ! -b "${PARAM_BOOT_DEV}" ]; then
+        printError "Invalid boot device (\"${PARAM_BOOT_DEV}\""")."
+        exit 1
+    fi
+
+    if [ ! -b "${PARAM_BOOT_DEV}${PARAM_BOOT_PART}" ]; then
+        printError "Invalid boot partition \"${PARAM_BOOT_DEV}${PARAM_BOOT_PART}\"."
+        exit 1
+    fi
+
+    blkid -s UUID -o value | grep "${PARAM_HOST_UUID}" &> /dev/null
+    EXIT_CODE=$?
+
+    if [ -z "${PARAM_HOST_UUID}" ] || [ ${EXIT_CODE} -ne 0 ]; then
+        printError "Invalid host UUID (\"${PARAM_HOST_UUID}\")."
+        exit 1
+    fi
+
+    if [ -z "${PARAM_HOST_FSTYPE}" ]; then
+        printError "Invalid or missing host filesystem type."
+        exit 1
+    fi
+
+    if [ -z "${PARAM_LOOP_DIR}" ]; then
+        printError "Invalid or missing host loopback files folder."
+        exit 1
+    fi
+
+    if [ "${LOOP_SIZE}" -le 0 ]; then
+        printError "Invalid main loopback file size (${LOOP_SIZE})."
+        exit 1
+    fi
+
+    if [ -z "${PARAM_LVM_VG}" ]; then
+        printError "Invalid or missing volume group name."
+        exit 1
+    fi
+
+    if [ -z "${PARAM_LVM_LV_ROOT}" ]; then
+        printError "Invalid or missing root logical volume name."
+        exit 1
+    fi
+
+    if [ -z "${PARAM_SWAP_SIZE}" ] || [ "${PARAM_SWAP_SIZE}" -le 0 ]; then
+        printError "Invalid swap file size (${PARAM_SWAP_SIZE})."
+        exit 1
+    fi
+
+    [ -x /usr/bin/boxes ] || apt-get install -y boxes || exit 1
+}
+
+checkPreRequisites
+
+# Ask for confirmation
+
+function askForConfirmation {
+    {
+        printInfo "You have choosen the following settings:\n"
+        set | grep -e "^PARAM_"
+    } | boxes -d shell -i none
+
+    printInfo "\nDo you want to proceed (y/n)?"
+    read -n 1 -r -s
+    [[ $REPLY =~ ^[Yy]$ ]] || exit 2
+
+    if [ ${PARAM_CLEAN} -eq 1 ]; then
+        printInfo ""
+        printInfo "Attention! You have choosen to clean all. Are you sure (y/n)?" | boxes -d shell -i none
+
+        read -n 1 -r -s
+        [[ $REPLY =~ ^[Yy]$ ]] || exit 2
+        printInfo ""
+    fi
+}
+
+askForConfirmation
+
+# Clean
+
+function doCleanUp {
+    local WANT_REMOVE_ALL=$1
+
+    if [ "${WANT_REMOVE_ALL}" -eq 1 ]; then
+        printInfo " - 'Remove all' flag has been set!"
+    else
+        printPerforming
+    fi
+
+    umountFolder ${LVM_TARGET_MNT}
+    removeFolder ${LVM_TARGET_MNT}
+
+    umountFolder ${BOOT_MNT}
+    removeFolder ${BOOT_MNT}
+
+    if [ -f SWAP_FILE ] && [ "${WANT_REMOVE_ALL}" -eq 1 ]; then
+        rm ${SWAP_FILE} > /dev/null || exitInstall
+        printInfo " - Removed swap file \"${SWAP_FILE}\"."
+    fi
+
+    if [ "${WANT_REMOVE_ALL}" -eq 1 ]; then
+
+        if lvdisplay ${LVM_LV_ROOT_DEV} &> /dev/null; then
+            {
+                lvchange -an ${LVM_LV_ROOT_DEV} > /dev/null \
+                && lvremove -y ${LVM_LV_ROOT_DEV} > /dev/null
+            } || exitInstall
+
+            printInfo " - Removed LV \"${LVM_LV_ROOT_DEV}\"."
+        fi
+
+        if vgdisplay ${PARAM_LVM_VG} &> /dev/null; then
+            {
+                vgchange -an ${PARAM_LVM_VG} > /dev/null \
+                && vgremove -y ${PARAM_LVM_VG} > /dev/null
+            } || exitInstall
+
+            printInfo " - Removed VG \"${PARAM_LVM_VG}\"."
+        fi
+
+    else
+
+        if lvdisplay ${LVM_LV_ROOT_DEV} &> /dev/null; then
+            lvchange -an ${LVM_LV_ROOT_DEV} > /dev/null || exitInstall
+            printInfo " - Deactivated LV \"${LVM_LV_ROOT_DEV}\"."
+        fi
+
+        if vgdisplay ${PARAM_LVM_VG} &> /dev/null; then
+            vgchange -an ${PARAM_LVM_VG} > /dev/null|| exitInstall
+            printInfo " - Deactivated VG \"${PARAM_LVM_VG}\"."
+        fi
+
+    fi
+
+    if losetup -nl | grep ${LOOP_DEV} &> /dev/null; then
+        if pvdisplay ${LOOP_DEV} &> /dev/null; then
+            pvremove -y ${LOOP_DEV} > /dev/null || exitInstall
+            printInfo " - Removed PV \"${LOOP_DEV}\"."
+        fi
+
+        losetup -d ${LOOP_DEV} > /dev/Jnull || exitInstall
+        printInfo " - Detached main loopback device \"${LOOP_DEV}\"."
+    fi
+
+    if [ -f ${LOOP_FILE} ] && [ "${WANT_REMOVE_ALL}" -eq 1 ]; then
+        rm ${LOOP_FILE} > /dev/null || exitInstall
+        printInfo " - Removed main loopback file \"${LOOP_FILE}\"."
+    fi
+
+    if mountpoint -q ${HOST_MNT}; then
+        printInfo " - Sleeping for a while (to avoid busy error)..."
+        losetup -D &> /dev/null
+        sleep 5
+
+        umountFolder ${HOST_MNT}
+    fi
+
+    removeFolder ${HOST_MNT}
+}
+
+[ ${PARAM_CLEAN} -eq 1 ] && doCleanUp 1
+
+# System loop files setup
+
+function doSystemLoopFilesSetup {
+    printPerforming
+
+    canRun && createFolder ${HOST_MNT}
+    saveResumeCheckPoint
+
+    canRun && mountDevice ${HOST_UUID} ${HOST_MNT}
+    saveResumeCheckPoint
+
+    canRun && createFolder ${LOOP_DIR}
+    saveResumeCheckPoint
+
+    if canRun; then
+        printInfo " - Creating main loopback file \"${LOOP_FILE}\"..."
+        dd status=progress if=/dev/zero of=${LOOP_FILE} bs=1M count=${LOOP_SIZE} || exitInstall
+        printInfo " - Created main loopback file \"${LOOP_FILE}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        losetup ${LOOP_DEV} ${LOOP_FILE} || exitInstall
+        printInfo " - Attached loopback device \"${LOOP_DEV}\" to file \"${LOOP_FILE}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        pvcreate -v ${LOOP_DEV} > /dev/null || exitInstall
+        printInfo " - Created PV \"${LOOP_DEV}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        vgcreate -v ${PARAM_LVM_VG} ${LOOP_DEV} > /dev/null || exitInstall
+        printInfo " - Created VG \"${PARAM_LVM_VG}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        lvcreate -v -l 100%FREE -n ${PARAM_LVM_LV_ROOT} ${PARAM_LVM_VG} > /dev/null || exitInstall
+        printInfo " - Created LV \"${LVM_LV_ROOT_DEV}\"."
+    fi
+
+    saveResumeCheckPoint
+}
+
+doSystemLoopFilesSetup
+
+# Linux distribution installation
+
+function doLinuxDistributionInstallation {
+    printPerforming
+
+    if canRun; then
+        {
+            printInfo " Ubiquity will start shortly, so you have to enter on your own the following settings:\n"
+            printInfo "  - Partitioning                        : \"something else\"."
+            printInfo "  - Device for boot loader installation : \"${PARAM_BOOT_DEV}\"."
+            printInfo "  - Boot partition (/boot)              : \"${BOOT_PART}\", ext4, at least 512Mb size."
+            printInfo "  - Root partition (/)                  : \"/dev/mapper/${PARAM_LVM_VG}-${PARAM_LVM_LV_ROOT}\", ext4, 100% size."
+            printInfo "  - Swap partition                      : none for the moment (answer to continue without swap space)."
+            printInfo "\n  Please answer to continue testing at installation end!"
+        } | boxes -d shell -i none
+
+        printInfo "\n Do you want to proceed with Ubiquity (y/n)?"
+        read -n 1 -r -s
+        [[ $REPLY =~ ^[Yy]$ ]] || exitInstall
+
+        printInfo " Starting Ubiquity..."
+        ubiquity || exitInstall
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        printInfo "\n Ubiquity does not always reports a correct exit code, so: do you want to continue with installation (y/n)?"
+        read -n 1 -r -s
+        [[ $REPLY =~ ^[Yy]$ ]] || exitInstall
+    fi
+
+    saveResumeCheckPoint
+
+    canRun && umountFolder /target # Sometimes left by Ubiquity!
+    saveResumeCheckPoint
+}
+
+doLinuxDistributionInstallation
+
+# Swap file setup
+
+function doSwapFileSetup {
+    printPerforming
+
+    if canRun; then
+        printInfo " - Creating swap file \"${SWAP_FILE}\"..."
+        dd status=progress if=/dev/zero of=${SWAP_FILE} bs=1M count=${SWAP_SIZE} || exitInstall
+        printInfo " - Created swap file \"${SWAP_FILE}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        mkswap ${SWAP_FILE} || exitInstall
+        printInfo " - Initialized swap file \"${SWAP_FILE}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        chmod 0600 ${SWAP_FILE} || exitInstall
+        printInfo " - Set swap file \"${SWAP_FILE}\" mode (if supported by the target filesystem)."
+    fi
+
+    saveResumeCheckPoint
+
+    canRun && createFolder ${LVM_TARGET_MNT}
+    saveResumeCheckPoint
+
+    canRun && mountDevice ${LVM_LV_ROOT_DEV} ${LVM_TARGET_MNT}
+    saveResumeCheckPoint
+
+    if canRun; then
+        local TMP_SWAP_FILE=/host/${PARAM_LOOP_DIR}/${PARAM_SWAP_FILE}
+        echo -e "\n${TMP_SWAP_FILE}\tnone\tswap\tsw\t0\t0\n" >> ${LVM_TARGET_MNT}/etc/fstab || exitInstall
+        printInfo " - Added swap file \"${TMP_SWAP_FILE}\" to target FSTAB file."
+    fi
+
+    saveResumeCheckPoint
+}
+
+doSwapFileSetup
+
+# InitRd image setup
+
+function doInitRdImageSetup_Pre {
+    printPerforming
+
+    canRun && createFolder ${BOOT_MNT}
+    saveResumeCheckPoint
+
+    canRun && mountDevice ${BOOT_PART} ${BOOT_MNT}
+    saveResumeCheckPoint
+
+    if canRun; then
+        echo "nameserver 8.8.8.8" > ${LVM_TARGET_MNT}/etc/resolv.conf || exitInstall
+        printInfo " - Configured Google DNS (maybe needed by APT)."
+    fi
+
+    saveResumeCheckPoint
+
+    canRun && bindFolder /dev ${LVM_TARGET_MNT}/dev
+    saveResumeCheckPoint
+
+    canRun && bindFolder /dev/pts ${LVM_TARGET_MNT}/dev/pts
+    saveResumeCheckPoint
+
+    canRun && bindFolder /sys ${LVM_TARGET_MNT}/sys
+    saveResumeCheckPoint
+
+    canRun && bindFolder /proc ${LVM_TARGET_MNT}/proc
+    saveResumeCheckPoint
+
+    canRun && bindFolder /run ${LVM_TARGET_MNT}/run
+    saveResumeCheckPoint
+
+    canRun && bindFolder ${BOOT_MNT} ${LVM_TARGET_MNT}/boot
+    saveResumeCheckPoint
+}
+
+doInitRdImageSetup_Pre
+
+function doInitRdImageSetup_Dracut {
+    printPerforming
+
+    if canRun; then
+        chroot \
+            ${LVM_TARGET_MNT} \
+            dpkg -l | awk '{ print $2 }' | grep -e '^dracut$' &> /dev/null
+
+        if [ $? -ne 0 ]; then
+            printInfo " - Installing Dracut..."
+
+            chroot \
+                ${LVM_TARGET_MNT} \
+                apt-get install -y --no-install-recommends dracut \
+                || exitInstall
+
+            printInfo " - Dracut installed."
+        else
+            printInfo " - Dracut already installed."
+        fi
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        cp ${CURRENT_DIR}/assets/dracut/*.conf ${LVM_DRACUT_CONF}/ || exitInstall
+        printInfo " - Installed configuration files."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        cp -r ${CURRENT_DIR}/assets/dracut/90linux-on-loopback-usb/ ${LVM_DRACUT_MODULES}/ || exitInstall
+        printInfo " - Installed module."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/dracut/update-dracut
+        local TMP_FOLDER=${LVM_TARGET_MNT}/sbin/
+        cp ${TMP_SCRIPT_NAME} ${TMP_FOLDER}/ || exitInstall
+
+        printInfo " - Installed script \"${TMP_SCRIPT_NAME}\" into \"${TMP_FOLDER}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        printInfo " - Updating InitRd image..."
+        chroot ${LVM_TARGET_MNT} /sbin/update-dracut || exitInstall
+        printInfo " - Updated InitRd image."
+    fi
+
+    saveResumeCheckPoint
+}
+
+function doInitRdImageSetup_InitRamFsTools {
+    printPerforming
+
+    if canRun; then
+        chroot \
+            ${LVM_TARGET_MNT} \
+            dpkg -l | awk '{ print $2 }' | grep -e '^initramfs-tools$' &> /dev/null
+
+        if [ $? -ne 0 ]; then
+            printInfo " - Installing InitRamFs Tools..."
+
+            chroot \
+                ${LVM_TARGET_MNT} \
+                apt-get install -y initramfs-tools \
+                || exitInstall
+
+            printInfo " - InitRamFs Tools installed."
+        else
+            printInfo " - InitRamFs Tools already installed."
+        fi
+    fi
+
+    if canRun; then
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/initramfs/lvm-loops-setup
+        cp ${TMP_SCRIPT_NAME} ${LVM_INITRAMFS_SCRIPTS}/local-top/ || exitInstall
+
+        printInfo " - Installed script \"${TMP_SCRIPT_NAME}\" into \"local-top\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        local TMP_SCRIPTS_NAME=${LVM_INITRAMFS_SCRIPTS}/local-top/*
+        chmod +x ${TMP_SCRIPTS_NAME} || exitInstall
+
+        printInfo " - Set \"${TMP_SCRIPTS_NAME}\" scripts mode."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/initramfs/lvm-loops-finalize
+        local TMP_TARGET=${LVM_INITRAMFS_SCRIPTS}/local-bottom/
+        cp ${TMP_SCRIPT_NAME} ${TMP_TARGET} || exitInstall
+
+        printInfo " - Installed script \"${TMP_SCRIPT_NAME}\" into \"${TMP_TARGET}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        local TMP_SCRIPTS_NAME=${LVM_INITRAMFS_SCRIPTS}/local-bottom/*
+        chmod +x ${TMP_SCRIPTS_NAME} || exitInstall
+
+        printInfo " - Set \"${TMP_SCRIPTS_NAME}\" scripts mode."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        cp ${CURRENT_DIR}/assets/initramfs/compress ${LVM_INITRAMFS_CONF} || exitInstall
+        printInfo " - Configured compression."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        printInfo " - Updating InitRd image..."
+        chroot ${LVM_TARGET_MNT} /usr/sbin/update-initramfs -u -k all || exitInstall
+        printInfo " - Updated InitRd image."
+    fi
+
+    saveResumeCheckPoint
+}
+
+[ ${PARAM_INITRD_TOOL} -eq 2 ] \
+    && doInitRdImageSetup_Dracut \
+    || doInitRdImageSetup_InitRamFsTools
+
+function doInitRdImageSetup_Post {
+    printPerforming
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/dev/pts
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/dev
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/sys
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/proc
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/run
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/boot
+    saveResumeCheckPoint
+}
+
+doInitRdImageSetup_Post
+
+# Grub configuration
+
+function doGrubConfiguration {
+    printPerforming
+
+    if canRun; then
+        local TMP_CONFIG=${LVM_DEFAULT_CONF}/grub
+        sed -i -r 's/GRUB_TIMEOUT=[0-9]+/GRUB_TIMEOUT=30/' ${TMP_CONFIG} || exitInstall
+
+        if grep 'GRUB_TIMEOUT_STYLE' ${TMP_CONFIG} &> /dev/null; then
+            sed -i -r 's/GRUB_TIMEOUT_STYLE=.+/GRUB_TIMEOUT_STYLE="menu"/' ${TMP_CONFIG} || exitInstall
+        else
+            echo -e "\nGRUB_TIMEOUT_STYLE=\"menu\"" >> ${TMP_CONFIG} || exitInstall
+        fi
+
+        printInfo " - Configured timeout (file \"${TMP_CONFIG}\")."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        local TMP_SOURCE=${CURRENT_DIR}/assets/grub/linux-on-loopback-usb.cfg
+        local TMP_TARGET=${LVM_DEFAULT_CONF}/grub.d/linux-on-loopback-usb.cfg
+
+        {
+               cp ${TMP_SOURCE} ${TMP_TARGET} \
+            && sed -i -r "s:\{\{PARAM_HOST_UUID\}\}:${PARAM_HOST_UUID}:" ${TMP_TARGET} \
+            && sed -i -r "s:\{\{PARAM_HOST_FSOPTIONS\}\}:${PARAM_HOST_FSOPTIONS}:" ${TMP_TARGET} \
+            && sed -i -r "s:\{\{PARAM_HOST_FSTYPE\}\}:${PARAM_HOST_FSTYPE}:" ${TMP_TARGET} \
+            && sed -i -r "s:\{\{LVM_LV_ROOT_DEV\}\}:${LVM_LV_ROOT_DEV}:" ${TMP_TARGET} \
+            && sed -i -r "s:\{\{PARAM_LOOP_DIR\}\}:${PARAM_LOOP_DIR}:" ${TMP_TARGET} \
+            && sed -i -r "s:\{\{PARAM_LVM_VG\}\}:${PARAM_LVM_VG}:" ${TMP_TARGET}
+        } || exitInstall
+
+        printInfo " - Installed configuration file \"${TMP_SOURCE}\" into \"${TMP_TARGET}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/grub/10_linux-on-loopback-usb
+        local TMP_FOLDER=${LVM_GRUB_CONF}/
+        cp ${TMP_SCRIPT_NAME} ${TMP_FOLDER} || exitInstall
+
+        printInfo " - Installed script \"${TMP_SCRIPT_NAME}\" into \"${TMP_FOLDER}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        chmod -x ${LVM_GRUB_CONF}/10_linux || exitInstall
+        printInfo " - Disabled default grub menu entries."
+    fi
+
+    canRun && bindFolder /dev ${LVM_TARGET_MNT}/dev
+    saveResumeCheckPoint
+
+    canRun && bindFolder /sys ${LVM_TARGET_MNT}/sys
+    saveResumeCheckPoint
+
+    canRun && bindFolder /proc ${LVM_TARGET_MNT}/proc
+    saveResumeCheckPoint
+
+    canRun && bindFolder ${BOOT_MNT} ${LVM_TARGET_MNT}/boot
+    saveResumeCheckPoint
+
+    if canRun; then
+        printInfo " - Updating Grub..."
+        chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub || exitInstall
+        printInfo " - Updated Grub."
+    fi
+
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/dev
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/sys
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/proc
+    saveResumeCheckPoint
+
+    canRun && unbindFolder ${LVM_TARGET_MNT}/boot
+    saveResumeCheckPoint
+}
+
+doGrubConfiguration
+
+# RSYSLOG - Filter out loops error messages
+
+function doRsyslogSetup {
+    printPerforming
+
+    if canRun; then
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/rsyslog/30-loop-errors.conf
+        local TMP_FOLDER=${LVM_RSYSLOG_CONF}/
+        cp ${TMP_SCRIPT_NAME} ${TMP_FOLDER} || exitInstall
+
+        printInfo " - Installed script \"${TMP_SCRIPT_NAME}\" into \"${TMP_FOLDER}\"."
+    fi
+
+    saveResumeCheckPoint
+
+    if canRun; then
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/rsyslog/linux-on-loopback-usb
+        local TMP_FOLDER=${LVM_LOGROTATE_CONF}/
+        cp ${TMP_SCRIPT_NAME} ${TMP_FOLDER} || exitInstall
+
+        printInfo " - Installed configuration \"${TMP_SCRIPT_NAME}\" into \"${TMP_FOLDER}\"."
+    fi
+
+    saveResumeCheckPoint
+}
+
+doRsyslogSetup
+
+# Finalization
+
+function doFinalization {
+    printPerforming
+
+    canRun && doCleanUp 0
+    saveResumeCheckPoint
+
+    printInfo " - Installation completed successufully."
+    printInfo " - Please, reboot to start new system."
+}
+
+doFinalization

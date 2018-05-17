@@ -1,7 +1,5 @@
 #!/bin/sh -e
 
-# Antonio Petricca <antonio.petricca@gmail.com> - 17/03/2018
-
 PREREQS=""
 
 # Output pre-requisites

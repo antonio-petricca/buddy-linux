@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# Antonio Petricca <antonio.petricca@gmail.com> - 09/03/2018
-
 PREREQ="lvm2"
 
 # Output pre-requisites
@@ -50,7 +48,7 @@ for param in $(cat /proc/cmdline); do
 done
 
 if [ "${LVM_LOOPS_HOST_DEV}" = "" ] || [ "${LVM_LOOPS_HOST_FSTYPE}" = "" ] || [ "${LVM_LOOPS_MASK}" = "" ]; then
-  log_warning_msg "One ore more arguments missing.LVM loops mount skipped."
+  log_warning_msg "One ore more arguments missing. LVM loops mount skipped.\n"
   exit 0
 fi
 
