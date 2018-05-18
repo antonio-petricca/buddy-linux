@@ -16,6 +16,10 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 - [Dracut](https://dracut.wiki.kernel.org/index.php/Main_Page) can be choosen (it is the default one) as _initramfs_ infrastructure. By its implementation of the [Systemd Shutdown process](https://www.systutorials.com/docs/linux/man/8-dracut-shutdown/) the loopback devices are safely released without any data loss.
 - Your OS can be upgraded to all future distributions (Wuby were pinned on a not upgradable Ubuntu release).
 
+### CONs
+
+- A bit of Linux knowledge is required to follow instructions.
+
 ## Pre-requisites
 
 - Boot from a Live Debian or derivated distribution.
