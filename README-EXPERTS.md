@@ -126,20 +126,23 @@ mv -v ${LVM_TARGET_MNT}/boot/* ${BOOT_MNT}
 ### Dracut
 
 ```bash
-chroot ${LVM_TARGET_MNT} /usr/bin/apt-get install -y --no-install-recommends dracut
-
-cp -v assets/dracut/*.conf ${LVM_DRACUT_CONF}/
-cp -rv assets/dracut/90buddy-linux/ ${LVM_DRACUT_MODULES}/
 
 mount --bind /dev ${LVM_TARGET_MNT}/dev
+mount --bind /dev ${LVM_TARGET_MNT}/dev/pts
 mount --bind /sys ${LVM_TARGET_MNT}/sys
 mount --bind /proc ${LVM_TARGET_MNT}/proc
 mount --bind /run ${LVM_TARGET_MNT}/run
 mount --bind ${BOOT_MNT} ${LVM_TARGET_MNT}/boot
 
+chroot ${LVM_TARGET_MNT} /usr/bin/apt-get install -y --no-install-recommends dracut
+
+cp -v assets/dracut/*.conf ${LVM_DRACUT_CONF}/
+cp -rv assets/dracut/90buddy-linux/ ${LVM_DRACUT_MODULES}/
+
 cp assets/dracut/update-dracut ${LVM_TARGET_MNT}/sbin/
 chroot ${LVM_TARGET_MNT} /sbin/update-dracut
 
+umount ${LVM_TARGET_MNT}/dev/pts
 umount ${LVM_TARGET_MNT}/dev
 umount ${LVM_TARGET_MNT}/sys
 umount ${LVM_TARGET_MNT}/proc
@@ -165,12 +168,14 @@ Customize `${LVM_DEFAULT_CONF}/grub.d/buddy-linux.cfg` with your own settings (`
 
 ```bash
 mount --bind /dev ${LVM_TARGET_MNT}/dev
+mount --bind /dev ${LVM_TARGET_MNT}/dev/pts
 mount --bind /sys ${LVM_TARGET_MNT}/sys
 mount --bind /proc ${LVM_TARGET_MNT}/proc
 mount --bind ${BOOT_MNT} ${LVM_TARGET_MNT}/boot
 
 chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub
 
+umount ${LVM_TARGET_MNT}/dev/pts
 umount ${LVM_TARGET_MNT}/dev
 umount ${LVM_TARGET_MNT}/sys
 umount ${LVM_TARGET_MNT}/proc
