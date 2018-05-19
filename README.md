@@ -10,7 +10,7 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 
 ### PROs
 
-- The [Grub 2](https://help.ubuntu.com/community/Grub2) bootloader can be installed on any device partitio, external or internal.
+- The [Grub 2](https://help.ubuntu.com/community/Grub2) bootloader can be installed on any device partition, external or internal.
 - You can host your loopback device files on any partition type, not only on NTFS ones.
 - Loopback device files partecipate to a [LVM](https://wiki.archlinux.org/index.php/LVM) physical volume cluster, so after a successfully installation, you can increase your logical volume size as you need (by booting with any Linux Live Distribution to extend it).
 - [Dracut](https://dracut.wiki.kernel.org/index.php/Main_Page) can be choosen (it is the default one) as _initramfs_ infrastructure. By its implementation of the [Systemd Shutdown process](https://www.systutorials.com/docs/linux/man/8-dracut-shutdown/) the loopback devices are safely released without any data loss.
