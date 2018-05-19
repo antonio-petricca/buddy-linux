@@ -25,10 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lot of refactoring.
 - Improved documentation.
 
-[0.0.1] - 2018-04-13
+## [0.0.1] - 2018-04-13
 
 - First release.
 
-[Unreleased]: https://github.com/antonio-petricca/buddy-linux/tree/feature/rename
-[0.0.2]: https://github.com/antonio-petricca/buddy-linux/compare/master...feature/dracut
+[1.0.0]: https://github.com/antonio-petricca/buddy-linux/compare/0.0.2...1.0.0
+[0.0.2]: https://github.com/antonio-petricca/buddy-linux/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/antonio-petricca/buddy-linux/tree/0.0.1
