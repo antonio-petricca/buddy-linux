@@ -1,10 +1,10 @@
-# Linux on Loopback devices and USB bootstrap
+# Buddy Linux
 
 ## Introduction
 
 Do you remember [Wubi Ubuntu Installer](https://en.wikipedia.org/wiki/Wubi_(software))?
 
-This project is either a replacement and an improvement of **Wubi**, obviously with its pros and cons.
+This project is both a replacement and an improvement of **Wubi**, obviously with its pros and cons.
 
 You will be able to install your [Debian](https://www.debian.org/index.it.html) (or derived) distribution on a PC without repartitioning it, simply by using a secondary/external boot device.
 
@@ -14,7 +14,11 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 - You can host your loopback device files on any partition type, not only on NTFS ones.
 - Loopback device files partecipate to a [LVM](https://wiki.archlinux.org/index.php/LVM) physical volume cluster, so after a successfully installation, you can increase your logical volume size as you need (by booting with any Linux Live Distribution to extend it).
 - [Dracut](https://dracut.wiki.kernel.org/index.php/Main_Page) can be choosen (it is the default one) as _initramfs_ infrastructure. By its implementation of the [Systemd Shutdown process](https://www.systutorials.com/docs/linux/man/8-dracut-shutdown/) the loopback devices are safely released without any data loss.
-- Your OS can be upgraded to all future distributions (Wuby were pinned on a not upgradable Ubuntu release).
+- Your OS can be upgraded to all future distributions (Wubi were pinned on a not upgradable Ubuntu release).
+
+### CONs
+
+- A bit of Linux knowledge is required to follow instructions.
 
 ### CONs
 
@@ -22,7 +26,7 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 
 ## Pre-requisites
 
-- Boot from a Live Debian or derivated distribution.
+- Boot from a Live Debian or derived distribution.
 - Insert a USB drive for bootloader, then umount it (if you want to boot from an external device).
 
 ## Clone repository
@@ -30,10 +34,8 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 ```
 sudo apt-get install git
 
-git clone https://github.com/DareDevil73/linux-on-loopback-usb.git
-cd linux-on-loopback-usb
-
-sudo su -
+git clone https://github.com/antonio-petricca/buddy-linux.git
+cd buddy-linux
 ```
 
 ## Become friend of the install script
@@ -137,7 +139,7 @@ Our notebook is equipped with a 1 Tb SATA disk (formatted as NTFS) and 8Gb of RA
 Is time to go...
 
 ```
-$ ./install  \
+$ sudo ./install  \
   --host-uuid C69E53819E536947 \
   --boot-device /dev/sdb \
   --boot-partition-index 1 \

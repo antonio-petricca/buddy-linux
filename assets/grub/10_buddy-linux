@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . /usr/share/grub/grub-mkconfig_lib
-. /etc/default/grub.d/linux-on-loopback-usb.cfg
+. /etc/default/grub.d/buddy-linux.cfg
 
 # Get kernels list
 
