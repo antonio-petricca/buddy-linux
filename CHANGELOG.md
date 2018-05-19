@@ -29,6 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First release.
 
-[1.0.0]: https://github.com/antonio-petricca/buddy-linux/tree/1.0.0
-[0.0.2]: https://github.com/antonio-petricca/buddy-linux/compare/master...feature/dracut
+[1.0.0]: https://github.com/antonio-petricca/buddy-linux/compare/0.0.2...1.0.0
+[0.0.2]: https://github.com/antonio-petricca/buddy-linux/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/antonio-petricca/buddy-linux/tree/0.0.1
