@@ -6,7 +6,11 @@ Do you remember [Wubi Ubuntu Installer](https://en.wikipedia.org/wiki/Wubi_(soft
 
 This project is both a replacement and an improvement of **Wubi**, obviously with its pros and cons.
 
+<<<<<<< HEAD
 You will be able to install your [Debian](https://www.debian.org/index.it.html) or derived distribution (I have used [Linux Mint Mate 18.3 64 bit](https://linuxmint.com/edition.php?id=248)) on a PC without repartitioning it, simply by using a secondary/external boot device.
+=======
+You will be able to install your [Debian](https://www.debian.org/index.it.html) or derived (I have used [Linux Mint Mate 18.3 64 bit](https://linuxmint.com/edition.php?id=248)) distribution on a PC without repartitioning it, simply by using a secondary/external boot device.
+>>>>>>> 6906955... Added reference to Linux Mint.
 
 ### PROs
 
