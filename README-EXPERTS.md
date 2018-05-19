@@ -1,4 +1,4 @@
-# Linux on Loopback devices and USB bootstrap (Experts Guide)
+# Buddy Linux (Experts Guide)
 
 ## Introduction
 
@@ -17,15 +17,15 @@ This guide will provide you detailed instructions, as an alternative to the auto
 
 ```
 sudo apt-get install git
-git clone https://github.com/DareDevil73/linux-on-loopback-usb.git
-cd linux-on-loopback-usb
+git clone https://github.com/antonio-petricca/buddy-linux.git
+cd buddy-linux
 
 sudo su -
 ```
 
 ## Parameters
 
-Set following parameters as you need:
+Set following (example) parameters as you need:
 
 ```bash
 PARAM_BOOT_DEV=/dev/sdc
@@ -129,7 +129,7 @@ mv -v ${LVM_TARGET_MNT}/boot/* ${BOOT_MNT}
 chroot ${LVM_TARGET_MNT} /usr/bin/apt-get install -y --no-install-recommends dracut
 
 cp -v assets/dracut/*.conf ${LVM_DRACUT_CONF}/
-cp -rv assets/dracut/90linux-on-loopback-usb/ ${LVM_DRACUT_MODULES}/
+cp -rv assets/dracut/90buddy-linux/ ${LVM_DRACUT_MODULES}/
 
 mount --bind /dev ${LVM_TARGET_MNT}/dev
 mount --bind /sys ${LVM_TARGET_MNT}/sys
@@ -157,11 +157,11 @@ Add settings to **grub.cfg** header:
   - Set `GRUB_TIMEOUT=30`
   - Set `GRUB_TIMEOUT_STYLE="menu"`
 
-- `cp -v assets/grub/linux-on-loopback-usb.cfg ${LVM_DEFAULT_CONF}/grub.d/`
-- `cp -v assets/grub/10_linux-on-loopback-usb ${LVM_GRUB_CONF}/`
+- `cp -v assets/grub/buddy-linux.cfg ${LVM_DEFAULT_CONF}/grub.d/`
+- `cp -v assets/grub/10_buddy-linux ${LVM_GRUB_CONF}/`
 - `chmod -x ${LVM_GRUB_CONF}/10_linux`
 
-Customize `${LVM_DEFAULT_CONF}/grub.d/linux-on-loopback-usb.cfg` with your own settings (`$${{ ... }}`) ignoring any LVM warning...
+Customize `${LVM_DEFAULT_CONF}/grub.d/buddy-linux.cfg` with your own settings (`$${{ ... }}`) ignoring any LVM warning...
 
 ```bash
 mount --bind /dev ${LVM_TARGET_MNT}/dev
@@ -184,7 +184,7 @@ In order to keep your syslog file clean clean (please look at **Known issues** s
 
 ```bash
 cp assets/rsyslog/30-loop-errors.conf ${LVM_RSYSLOG_CONF}/
-cp assets/rsyslog/linux-on-loopback-usb ${LVM_LOGROTATE_CONF}/
+cp assets/rsyslog/buddy-linux ${LVM_LOGROTATE_CONF}/
 ```
 
 ## Finally start Linux
@@ -209,7 +209,7 @@ In order to use the `restore-boot-usb-drive` tool you have to prepare a fresh US
 1. If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
 2. Schedule `backup-boot-usb-drive` to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
 3. You can install on MMC too (put **/dev/mmcblk0p1** on FSTAB as **/boot**).
-4. If you host your loopback files on a NTFS volume you can gain performances by setting `HOST_DEV_FSOPTIONS=noatime,async,big_writes` inside **linux-on-loopback-usb.cfg**.
+4. If you host your loopback files on a NTFS volume you can gain performances by setting `HOST_DEV_FSOPTIONS=noatime,async,big_writes` inside **buddy-linux.cfg**.
 5. **Systemd** debug:
   - [Kernel](https://freedesktop.org/wiki/Software/systemd/Debugging/) debug parameters: `systemd.log_level=debug systemd.log_target=console console=ttyS0,38400 console=tty1`
   - [Client](https://gist.github.com/snb/284940/11e6354f170be602c9c2f67b59d489ed49ebd143: `screen /tmp/host-pipe.socket`

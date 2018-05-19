@@ -397,7 +397,7 @@ checkPreRequisites
 
 function askForConfirmation {
     {
-        printInfo "You have choosen the following settings:\n"
+        printInfo "You have chosen the following settings:\n"
         set | grep -e "^PARAM_"
     } | boxes -d shell -i none
 
@@ -407,7 +407,7 @@ function askForConfirmation {
 
     if [ ${PARAM_CLEAN} -eq 1 ]; then
         printInfo ""
-        printInfo "Attention! You have choosen to clean all. Are you sure (y/n)?" | boxes -d shell -i none
+        printInfo "Attention! You have chosen to clean all. Are you sure (y/n)?" | boxes -d shell -i none
 
         read -n 1 -r -s
         [[ $REPLY =~ ^[Yy]$ ]] || exit 2
@@ -474,7 +474,7 @@ function doCleanUp {
     fi
 
     if losetup -nl | grep ${LOOP_DEV} &> /dev/null; then
-        if pvdisplay ${LOOP_DEV} &> /dev/null; then
+        if pvdisplay ${LOOP_DEV} &> /dev/null && [ "${WANT_REMOVE_ALL}" -eq 1 ]; then
             pvremove -y ${LOOP_DEV} > /dev/null || exitInstall
             printInfo " - Removed PV \"${LOOP_DEV}\"."
         fi
@@ -608,7 +608,7 @@ function doSwapFileSetup {
     saveResumeCheckPoint
 
     if canRun; then
-        mkswap ${SWAP_FILE} || exitInstall
+        mkswap ${SWAP_FILE} > /dev/null || exitInstall
         printInfo " - Initialized swap file \"${SWAP_FILE}\"."
     fi
 
@@ -709,7 +709,7 @@ function doInitRdImageSetup_Dracut {
     saveResumeCheckPoint
 
     if canRun; then
-        cp -r ${CURRENT_DIR}/assets/dracut/90linux-on-loopback-usb/ ${LVM_DRACUT_MODULES}/ || exitInstall
+        cp -r ${CURRENT_DIR}/assets/dracut/90buddy-linux/ ${LVM_DRACUT_MODULES}/ || exitInstall
         printInfo " - Installed module."
     fi
 
@@ -858,8 +858,8 @@ function doGrubConfiguration {
     saveResumeCheckPoint
 
     if canRun; then
-        local TMP_SOURCE=${CURRENT_DIR}/assets/grub/linux-on-loopback-usb.cfg
-        local TMP_TARGET=${LVM_DEFAULT_CONF}/grub.d/linux-on-loopback-usb.cfg
+        local TMP_SOURCE=${CURRENT_DIR}/assets/grub/buddy-linux.cfg
+        local TMP_TARGET=${LVM_DEFAULT_CONF}/grub.d/buddy-linux.cfg
 
         {
                cp ${TMP_SOURCE} ${TMP_TARGET} \
@@ -877,7 +877,7 @@ function doGrubConfiguration {
     saveResumeCheckPoint
 
     if canRun; then
-        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/grub/10_linux-on-loopback-usb
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/grub/10_buddy-linux
         local TMP_FOLDER=${LVM_GRUB_CONF}/
         cp ${TMP_SCRIPT_NAME} ${TMP_FOLDER} || exitInstall
 
@@ -942,7 +942,7 @@ function doRsyslogSetup {
     saveResumeCheckPoint
 
     if canRun; then
-        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/rsyslog/linux-on-loopback-usb
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/rsyslog/buddy-linux
         local TMP_FOLDER=${LVM_LOGROTATE_CONF}/
         cp ${TMP_SCRIPT_NAME} ${TMP_FOLDER} || exitInstall
 

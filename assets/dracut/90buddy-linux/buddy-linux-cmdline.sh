@@ -22,8 +22,8 @@ if [ "${LVM_LOOPS_HOST_DEV}" = "" ]; then
   exit 0
 fi
 
-cat > /etc/udev/rules.d/90-linux-on-loopback-usb.rules << EOF
+cat > /etc/udev/rules.d/90-buddy-linux.rules << EOF
 # http://www.reactivated.net/writing_udev_rules.html#ownership
 
-ENV{ID_FS_UUID}=="${LVM_LOOPS_HOST_DEV}", RUN+="/sbin/initqueue --settled --onetime --name linux-on-loopback-usb-setup /bin/bash /sbin/linux-on-loopback-usb-setup.sh"
+ENV{ID_FS_UUID}=="${LVM_LOOPS_HOST_DEV}", RUN+="/sbin/initqueue --settled --onetime --name buddy-linux-setup /bin/bash /sbin/buddy-linux-setup.sh"
 EOF
