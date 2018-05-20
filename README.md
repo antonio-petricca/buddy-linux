@@ -31,7 +31,7 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 
 ## Clone repository
 
-```
+```bash
 sudo apt-get install git
 
 git clone https://github.com/antonio-petricca/buddy-linux.git
@@ -46,7 +46,7 @@ You should simply follow the instructions provided by it. Even if something will
 
 Here is the parameteres list...
 
-```
+```bash
 install [OPTIONS]
 
     Executive arguments:
@@ -56,7 +56,7 @@ install [OPTIONS]
       -r | --resume               : resume execution from a given line number.
 
     Mandatory arguments:
-
+****
       -b | --boot-device          : boot (USB) device (eg: /dev/sdc).
       -u | --host-uuid            : loop files host device UUID (got by blkid).
       -f | --host-fs-type         : host device filesystem type (default: "ntfs-3g").
@@ -85,7 +85,7 @@ We have to gather some information to pass to install script, so...
 
 The host disk is the notebook internal drive partition where we want to create the (first) loopback file where we will install our Linux.
 
-```
+```bash
 $ blkid
 
 /dev/sda1: LABEL="ESP" UUID="E00C-5421" TYPE="vfat" PARTLABEL="EFI system partition" PARTUUID="fb4ed2b9-80ee-4585-ba9a-98ad5fff9577"
@@ -105,7 +105,7 @@ The USB drive is the disk where Grub will be installed and that will host the bo
 
 So,
 
-```
+```bash
 $ lsblk
 
 NAME                MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
@@ -138,7 +138,7 @@ Our notebook is equipped with a 1 Tb SATA disk (formatted as NTFS) and 8Gb of RA
 
 Is time to go...
 
-```
+```bash
 $ sudo ./install  \
   --host-uuid C69E53819E536947 \
   --boot-device /dev/sdb \
@@ -149,3 +149,82 @@ $ sudo ./install  \
 ```
 
 Pay much attention to the Ubiquity step, then enjoy with your Linux setup!
+
+## Disaster recovery
+
+Using your buddy linux, the boot drive, especially if it is a USB device, may fail, so you should have a valid restorable backup.
+
+### Backup your boot drive
+
+The **boot-drive-backup** script provides you a simple script to backup your boot device into a **tar.xz** file. That file can be restored by the script **boot-drive-restore**.
+
+Here is a simple usage example:
+
+```bash
+$ ./boot-drive-backup
+
+boot-drive-backup [Compressed boot image file basename]
+
+$ sudo ./boot-drive-backup ${HOME}/Dropbox/my-boot-drive
+```
+
+It will create a file named **my-boot-drive.tar.xz** (e.g. which you can store on DropBox or preferred cloud), that you may provide to **boot-drive-restore** to restore your boot drive, or clone a new one.
+
+### Restore drive
+
+In order to restore the boot drive onto the currently mounted boot device, please look at the following example:
+
+```bash
+$ ./boot-drive-restore
+
+boot-drive-restore [Boot device] [Boot partition mount point] [Boot image compressed file name]
+```
+
+So, using then data gathered from the installation example, and assuming our backup file is **${HOME}/Dropbox/my-boot-drive.tar.xz**, we should restore our boot device by running this command:
+
+```bash
+$ ./boot-drive-restore /dev/sdb /boot ${HOME}/Dropbox/my-boot-drive.tar.xz
+```
+
+## Clone / Create a backup boot device
+
+A bit more tricky, but more useful, is to create a backup boot device.
+
+It may be accomplished by following the following rules:
+
+- Take a new (USB) drive.
+- Destroy all partitions (e.g. by **GParted**).
+- Create a new, at least 512Mb size, ext4 partition.
+- Flag it as **BOOTable** (else you will get an **"Invalid partition table"** warning at boot time that you may skip by pressing **ESC** key).
+- If you wish, partition remaining space as you need (for other use cases).
+
+Now run the **boot-drive-restore** script as follow (assuming that the backup device maybe **/dev/sdc**, mounted on **/media/my-2nd-boot-drive**):
+
+```bash
+
+$ sudo ./boot-drive-restore /dev/sdc /media/my-2nd-boot-drive ${HOME}/Dropbox/my-boot-drive.tar.xz
+
+...
+
+$ sudo umount /media/my-2nd-boot-drive
+
+```
+
+## Extend Logical Volume
+
+This is a trivial task, but not impossibile for anybody!
+
+You may add as much space as you need by creating new loopback files by following the instruction provided (for the first "_0-index_" one) into the **README-EXPERTS.md** guide, at **System loop files setup** paragraph (look at **dd** command).
+
+In order to do this you have to:
+
+- Boot your preferred live distribution.
+- Create one ore more additional loopback files (as stated above).
+- `$ losetup -f {{NEW_LOOPBACK_FILE(S)_FULL_PATH}}`.
+- Install **system-config-lvm**.
+- Initialize new files.
+- Add new files to the _Virtual Group_.
+- Extend the _Logical Volume_.
+- Reboot your **Buddy Linux**.
+
+That's all!

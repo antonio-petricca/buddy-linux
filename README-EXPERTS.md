@@ -16,11 +16,12 @@ This guide will provide you detailed instructions, as an alternative to the auto
 ## Clone repository
 
 ```
-sudo apt-get install git
-git clone https://github.com/antonio-petricca/buddy-linux.git
-cd buddy-linux
 
 sudo su -
+apt-get install git
+
+git clone https://github.com/antonio-petricca/buddy-linux.git
+cd buddy-linux
 ```
 
 ## Parameters
@@ -199,20 +200,20 @@ sync
 reboot
 ```
 
-## Restore boot USB drive to a new one
+## Restore boot drive to a new one
 
-In order to use the `restore-boot-usb-drive` tool you have to prepare a fresh USB drive:
+In order to use the **boot-drive-backup** tool you have to prepare a fresh (USB) drive:
 
 - Destroy all partitions.
 - Create a new 512Mb ext4 partition.
-- Flag it as BOOTable (else you will get an **"Invalid partition table"** warning at boot that you may skip by pressing ESC).
-- If you wish, partition remaining space as FAT32.
-- Now run `restore-boot-usb-drive` to get help on its command line parameters.
+- Flag it as BOOTable (else you will get an **"Invalid partition table"** warning at boot time that you may skip by pressing **ESC** key).
+- If you wish, partition remaining space as you need (for other use cases).
+- Now run **boot-drive-restore** to get help on its command line parameters.
 
 ## FAQ
 
-1. If you create a new USB boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent.
-2. Schedule `backup-boot-usb-drive` to a cloud drive in order to make your system bootable due to a USB drive failure (restore backups by **restore-boot-usb-drive**).
+1. If you create a new (USB) boot drive remember to update the boot partition UUID inside FSTAB, or use the form **/dev/xxxyy** to make it independent from your physycal device.
+2. Schedule **boot-drive-backup** to a cloud drive in order to make your system bootable due to a (USB) drive failure (restore backups by **boot-drive-restore**).
 3. You can install on MMC too (put **/dev/mmcblk0p1** on FSTAB as **/boot**).
 4. If you host your loopback files on a NTFS volume you can gain performances by setting `HOST_DEV_FSOPTIONS=noatime,async,big_writes` inside **buddy-linux.cfg**.
 5. **Systemd** debug:

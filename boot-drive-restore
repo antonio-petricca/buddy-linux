@@ -1,12 +1,12 @@
 #!/bin/bash
 
-if [[ $EUID > 0 ]]; then # we can compare directly with this syntax.
-  echo "Please run as root/sudo!"
+if [ $# -lt 3 ]; then
+  echo "$(basename $0) [Boot device] [Boot partition mount point] [Boot image compress file name]"
   exit 1
 fi
 
-if [ $# -lt 3 ]; then
-  echo "$(basename $0) [USB DEV] [USB BOOT PARTITION MOUNT POINT] [BACKUP FILE]"
+if [[ $EUID > 0 ]]; then # we can compare directly with this syntax.
+  echo "Please run as root/sudo!"
   exit 1
 fi
 
