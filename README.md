@@ -31,7 +31,7 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 
 ## Clone repository
 
-```
+```bash
 sudo apt-get install git
 
 git clone https://github.com/antonio-petricca/buddy-linux.git
@@ -46,7 +46,7 @@ You should simply follow the instructions provided by it. Even if something will
 
 Here is the parameteres list...
 
-```
+```bash
 install [OPTIONS]
 
     Executive arguments:
@@ -85,7 +85,7 @@ We have to gather some information to pass to install script, so...
 
 The host disk is the notebook internal drive partition where we want to create the (first) loopback file where we will install our Linux.
 
-```
+```bash
 $ blkid
 
 /dev/sda1: LABEL="ESP" UUID="E00C-5421" TYPE="vfat" PARTLABEL="EFI system partition" PARTUUID="fb4ed2b9-80ee-4585-ba9a-98ad5fff9577"
@@ -105,7 +105,7 @@ The USB drive is the disk where Grub will be installed and that will host the bo
 
 So,
 
-```
+```bash
 $ lsblk
 
 NAME                MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
@@ -138,7 +138,7 @@ Our notebook is equipped with a 1 Tb SATA disk (formatted as NTFS) and 8Gb of RA
 
 Is time to go...
 
-```
+```bash
 $ sudo ./install  \
   --host-uuid C69E53819E536947 \
   --boot-device /dev/sdb \
@@ -149,3 +149,51 @@ $ sudo ./install  \
 ```
 
 Pay much attention to the Ubiquity step, then enjoy with your Linux setup!
+
+## Disaster recovery
+
+Using your buddy linux, the boot drive, especially if it is a USB device, it may fail, so you should a valid restorable backup.
+
+### Backup your (USB) boot drive
+
+```bash
+$ ./boot-drive-backup
+
+boot-drive-backup [Compressed boot image file basename]
+
+$ ./boot-drive-backup ${HOME}/Dropbox/my-boot-drive
+```
+
+It will create a file name **my-boot-drive.tar.xz** that (e.g. stored on DropBox), that you will provide to **boot-drive-restore** to restore your boot drive, or clone a new one.
+
+### Restore (USB) drive
+
+In order to restore or clone the (USB) boot drive, please look at **boot-drive-restore** command parameters:
+
+```bash
+$ ./boot-drive-restore
+
+boot-drive-restore [(USB) device] [(USB) boot partition mount point] [Boot image compress file name]
+```
+
+So, using then data gathered for installation example, and assuming our backup is **${HOME}/Dropbox/my-boot-drive.tar.xz** we can restored our boot device by running this command:
+
+```bash
+$ ./boot-drive-restore /dev/sdb /boot ${HOME}/Dropbox/my-boot-drive.tar.xz
+```
+
+## Clone (USB) drive
+
+It may be accomplished by following these rules:
+
+- Take a new (USB) drive.
+- Destroy all partitions.
+- Create a new, at least 512Mb size, ext4 partition.
+- Flag it as BOOTable (else you will get an **"Invalid partition table"** warning at boot that you may skip by pressing ESC).
+- If you wish, partition remaining space as FAT32.
+
+Now run **boot-drive-restore** as follow:
+
+```bash
+#TODO
+```
