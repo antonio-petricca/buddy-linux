@@ -16,11 +16,12 @@ This guide will provide you detailed instructions, as an alternative to the auto
 ## Clone repository
 
 ```
-sudo apt-get install git
-git clone https://github.com/antonio-petricca/buddy-linux.git
-cd buddy-linux
 
 sudo su -
+apt-get install git
+
+git clone https://github.com/antonio-petricca/buddy-linux.git
+cd buddy-linux
 ```
 
 ## Parameters
