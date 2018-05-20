@@ -200,7 +200,7 @@ sync
 reboot
 ```
 
-## Restore boot (USB) drive to a new one
+## Restore boot drive to a new one
 
 In order to use the **boot-drive-backup** tool you have to prepare a fresh (USB) drive:
 

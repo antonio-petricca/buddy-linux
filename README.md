@@ -209,3 +209,22 @@ $ sudo ./boot-drive-restore /dev/sdc /media/my-2nd-boot-drive ${HOME}/Dropbox/my
 $ sudo umount /media/my-2nd-boot-drive
 
 ```
+
+## Extend Logical Volume
+
+This is a trivial task, but not impossibile for anybody!
+
+You may add as much space as you need by creating new loopback files by following the instruction provided (for the first "_0-index_" one) into the **README-EXPERTS.md** guide, at **System loop files setup** paragraph (look at **dd** command).
+
+In order to do this you have to:
+
+- Boot your preferred live distribution.
+- Create one ore more additional loopback files (as stated above).
+- `$ losetup -f {{NEW_LOOPBACK_FILE(S)_FULL_PATH}}`.
+- Install **system-config-lvm**.
+- Initialize new files.
+- Add new files to the _Virtual Group_.
+- Extend the _Logical Volume_.
+- Reboot your **Buddy Linux**.
+
+That's all!
