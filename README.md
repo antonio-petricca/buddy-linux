@@ -56,7 +56,7 @@ install [OPTIONS]
       -r | --resume               : resume execution from a given line number.
 
     Mandatory arguments:
-
+****
       -b | --boot-device          : boot (USB) device (eg: /dev/sdc).
       -u | --host-uuid            : loop files host device UUID (got by blkid).
       -f | --host-fs-type         : host device filesystem type (default: "ntfs-3g").
@@ -152,48 +152,60 @@ Pay much attention to the Ubiquity step, then enjoy with your Linux setup!
 
 ## Disaster recovery
 
-Using your buddy linux, the boot drive, especially if it is a USB device, it may fail, so you should a valid restorable backup.
+Using your buddy linux, the boot drive, especially if it is a USB device, may fail, so you should have a valid restorable backup.
 
-### Backup your (USB) boot drive
+### Backup your boot drive
+
+The **boot-drive-backup** script provides you a simple script to backup your boot device into a **tar.xz** file. That file can be restored by the script **boot-drive-restore**.
+
+Here is a simple usage example:
 
 ```bash
 $ ./boot-drive-backup
 
 boot-drive-backup [Compressed boot image file basename]
 
-$ ./boot-drive-backup ${HOME}/Dropbox/my-boot-drive
+$ sudo ./boot-drive-backup ${HOME}/Dropbox/my-boot-drive
 ```
 
-It will create a file name **my-boot-drive.tar.xz** that (e.g. stored on DropBox), that you will provide to **boot-drive-restore** to restore your boot drive, or clone a new one.
+It will create a file named **my-boot-drive.tar.xz** (e.g. which you can store on DropBox or preferred cloud), that you may provide to **boot-drive-restore** to restore your boot drive, or clone a new one.
 
-### Restore (USB) drive
+### Restore drive
 
-In order to restore or clone the (USB) boot drive, please look at **boot-drive-restore** command parameters:
+In order to restore the boot drive onto the currently mounted boot device, please look at the following example:
 
 ```bash
 $ ./boot-drive-restore
 
-boot-drive-restore [(USB) device] [(USB) boot partition mount point] [Boot image compress file name]
+boot-drive-restore [Boot device] [Boot partition mount point] [Boot image compressed file name]
 ```
 
-So, using then data gathered for installation example, and assuming our backup is **${HOME}/Dropbox/my-boot-drive.tar.xz** we can restored our boot device by running this command:
+So, using then data gathered from the installation example, and assuming our backup file is **${HOME}/Dropbox/my-boot-drive.tar.xz**, we should restore our boot device by running this command:
 
 ```bash
 $ ./boot-drive-restore /dev/sdb /boot ${HOME}/Dropbox/my-boot-drive.tar.xz
 ```
 
-## Clone (USB) drive
+## Clone / Create a backup boot device
 
-It may be accomplished by following these rules:
+A bit more tricky, but more useful, is to create a backup boot device.
+
+It may be accomplished by following the following rules:
 
 - Take a new (USB) drive.
-- Destroy all partitions.
+- Destroy all partitions (e.g. by **GParted**).
 - Create a new, at least 512Mb size, ext4 partition.
-- Flag it as BOOTable (else you will get an **"Invalid partition table"** warning at boot that you may skip by pressing ESC).
-- If you wish, partition remaining space as FAT32.
+- Flag it as **BOOTable** (else you will get an **"Invalid partition table"** warning at boot time that you may skip by pressing **ESC** key).
+- If you wish, partition remaining space as you need (for other use cases).
 
-Now run **boot-drive-restore** as follow:
+Now run the **boot-drive-restore** script as follow (assuming that the backup device maybe **/dev/sdc**, mounted on **/media/my-2nd-boot-drive**):
 
 ```bash
-#TODO
+
+$ sudo ./boot-drive-restore /dev/sdc /media/my-2nd-boot-drive ${HOME}/Dropbox/my-boot-drive.tar.xz
+
+...
+
+$ sudo umount /media/my-2nd-boot-drive
+
 ```

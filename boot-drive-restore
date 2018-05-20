@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -lt 3 ]; then
-  echo "$(basename $0) [(USB) device] [(USB) boot partition mount point] [Boot image compress file name]"
+  echo "$(basename $0) [Boot device] [Boot partition mount point] [Boot image compress file name]"
   exit 1
 fi
 

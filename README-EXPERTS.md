@@ -206,8 +206,8 @@ In order to use the **boot-drive-backup** tool you have to prepare a fresh (USB)
 
 - Destroy all partitions.
 - Create a new 512Mb ext4 partition.
-- Flag it as BOOTable (else you will get an **"Invalid partition table"** warning at boot that you may skip by pressing ESC).
-- If you wish, partition remaining space as FAT32.
+- Flag it as BOOTable (else you will get an **"Invalid partition table"** warning at boot time that you may skip by pressing **ESC** key).
+- If you wish, partition remaining space as you need (for other use cases).
 - Now run **boot-drive-restore** to get help on its command line parameters.
 
 ## FAQ
