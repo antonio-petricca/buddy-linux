@@ -206,7 +206,13 @@ $ sudo umount /media/my-2nd-boot-drive
 
 ```
 
-## Extend Logical Volume
+## Tips & Tricks
+
+### NTFS driver update
+
+I suggest you to keep [NTFS-3G driver](https://www.tuxera.com/community/open-source-ntfs-3g/) updated to the latest release.
+
+### Extend Logical Volume
 
 This is a trivial task, but not impossibile for anybody!
 
@@ -222,11 +228,3 @@ In order to do this you have to:
 - Add new files to the _Virtual Group_.
 - Extend the _Logical Volume_.
 - Reboot your **Buddy Linux**.
-
-That's all!
-
-## Tips & Tricks
-
-### NTFS driver update
-
-I suggest you to keep [NTFS-3G driver](https://www.tuxera.com/community/open-source-ntfs-3g/) updated to the latest release.
