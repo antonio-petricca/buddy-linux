@@ -210,7 +210,7 @@ $ sudo umount /media/my-2nd-boot-drive
 
 ### NTFS driver update
 
-I suggest you to keep [NTFS-3G driver](https://www.tuxera.com/community/open-source-ntfs-3g/) updated to the latest release.
+I suggest you to keep [NTFS-3G driver](https://www.tuxera.com/community/open-source-ntfs-3g/) updated to the latest release (if you need it).
 
 ### Extend Logical Volume
 

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Added suggestion abount NTFG-3G driver update.
+- Added suggestion about NTFG-3G driver update.
 - Added Dracut shutdown warning known issue.
 
 ## [1.0.1] - 2019-05-21
