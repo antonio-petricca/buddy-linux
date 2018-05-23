@@ -228,3 +228,9 @@ In order to do this you have to:
 - Reboot your **Buddy Linux**.
 
 That's all!
+
+## Tips & Tricks
+
+### NTFS driver update
+
+I suggest you to keep [NTFS-3G driver](https://www.tuxera.com/community/open-source-ntfs-3g/) updated to the latest release.

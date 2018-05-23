@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- Added suggestion abount NTFG-3G driver update.
+- Added Dracut shutdown warning known issue.
+
 ## [1.0.1] - 2019-05-21
 
 - Published boot drive backup and restore scripts.
@@ -33,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First release.
 
+[Unreleased]: https://github.com/antonio-petricca/buddy-linux/tree/develop
 [1.0.1]: https://github.com/antonio-petricca/buddy-linux/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/antonio-petricca/buddy-linux/compare/0.0.2...1.0.0
 [0.0.2]: https://github.com/antonio-petricca/buddy-linux/compare/0.0.1...0.0.2
