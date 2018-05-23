@@ -20,10 +20,6 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 
 - A bit of Linux knowledge is required to follow instructions.
 
-### CONs
-
-- A bit of Linux knowledge is required to follow instructions.
-
 ## Pre-requisites
 
 - Boot from a Live Debian or derived distribution.
