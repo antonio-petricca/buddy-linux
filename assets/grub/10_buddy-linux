@@ -13,22 +13,25 @@ done)
 
 latest_kernel=$(version_find_latest ${KERNELS} | sed -e "s,^[^0-9]*-,,g")
 
+if [ ${WANT_PARAGON_NTFS_EXPRESS_DRIVER} = 0 ]; then
+
 cat << EOF
-set default="Loopback (${latest_kernel})"
+set default="Loopback (${latest_kernel} - \"${HOST_DEV_FSTYPE}\")"
 EOF
 
-echo "Default loopback kernel will be \"${latest_kernel}\"." 1>&2
+  echo "Default loopback kernel will be \"${latest_kernel}\"." 1>&2
+fi
 
 # Adding entries
 
 for kernel in ${KERNELS}; do
 
   KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
-  echo "Found loopback kernel \"${KERNEL}\"." 1>&2
+  echo "Found loopback kernel \"${KERNEL}\" - \"${HOST_DEV_FSTYPE}\"." 1>&2
 
 cat << EOF
 
-menuentry 'Loopback (${KERNEL})' --class gnu-linux --class gnu --class os {
+menuentry 'Loopback (${KERNEL} - \"${HOST_DEV_FSTYPE}\")' --class gnu-linux --class gnu --class os {
   echo "Loading modules..."
 
   insmod xzio
@@ -49,13 +52,13 @@ done
 
 # Loopback recovery
 
-if [ ${WANT_RECOVERY} = 1 ]; then
+if [ ${WANT_RECOVERY} = 1 ] && [ ${WANT_PARAGON_NTFS_EXPRESS_DRIVER} = 0 ]; then
 
 echo "Adding loopback recovery kernel \"${latest_kernel}\"." 1>&2
 
 cat << EOF
 
-menuentry 'Loopback (Recovery)' --class gnu-linux --class gnu --class os {
+menuentry 'Loopback (Recovery - \"${HOST_DEV_FSTYPE}\")' --class gnu-linux --class gnu --class os {
   echo "Loading modules..."
 
   insmod xzio
@@ -76,13 +79,13 @@ fi
 
 # Net console
 
-if [ ! -z "${NET_CONSOLE}" ]; then
+if [ ! -z "${NET_CONSOLE}" ] && [ ${WANT_PARAGON_NTFS_EXPRESS_DRIVER} = 0 ]; then
 
 echo "Adding loopback net console kernel \"${latest_kernel}\"." 1>&2
 
 cat << EOF
 
-menuentry 'Loopback (NetConsole)' --class gnu-linux --class gnu --class os {
+menuentry 'Loopback (NetConsole - \"${HOST_DEV_FSTYPE}\")' --class gnu-linux --class gnu --class os {
   echo "Loading modules..."
 
   insmod xzio

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+. /etc/default/grub.d/buddy-linux.cfg
+
+if [ ${WANT_PARAGON_NTFS_EXPRESS_DRIVER} = 1 ]; then
+  export HOST_DEV_FSOPTIONS=ufsd
+
+  CURRENT_DIR=$(readlink -f $(dirname $0))
+  ${CURRENT_DIR}/10_buddy-linux
+fi

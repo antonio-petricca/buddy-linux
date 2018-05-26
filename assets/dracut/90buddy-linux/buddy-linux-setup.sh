@@ -51,6 +51,7 @@ if [ "${LVM_LOOPS_HOST_FSTYPE}" == "ntfs" ] || [ "${LVM_LOOPS_HOST_FSTYPE}" == "
 
   exec -a @ntfs-3g ntfs-3g ${HOST_DEV} ${MNT} 2>&1 | vinfo
 else
+  modprobe ${LVM_LOOPS_HOST_FSOPTIONS} 2>&1 | vinfo
   mount -t ${LVM_LOOPS_HOST_FSTYPE} ${HOST_DEV} ${MNT} 2>&1 | vinfo
 fi
 
