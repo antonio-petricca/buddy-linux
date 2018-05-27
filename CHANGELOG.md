@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Dracut shutdown warning known issue.
 - Added support for [Paragon Express NTFS driver](https://www.paragon-software.com/home/ntfs-linux-professional/).
 
+## Changed
+
+- Deprecated **README-EXPERTS.md**.
+
+## Removed
+
+- Removed support from NetConsole.
+- Removed Recovery, not working with Dracut (you may use a Live USB to recover).
+
 ## [1.0.1] - 2019-05-21
 
 - Published boot drive backup and restore scripts.

@@ -1,37 +1,19 @@
-#!/bin/sh
+#!/bin/bash
 
-. /usr/share/grub/grub-mkconfig_lib
+. /etc/default/grub
 . /etc/default/grub.d/buddy-linux.cfg
+. /usr/share/grub/grub-mkconfig_lib
 
-# Get kernels list
+function addMenuEntry {
+  local KERNEL=$1
+  local FSTYPE=$2
+  local NAME=$3
 
-KERNELS=$(for file in /boot/vmlinuz-* /vmlinuz-* /boot/kernel-* ; do
-  if grub_file_is_not_garbage "${file}" ; then echo -n "${file} " ; fi
-done)
+  local ENTRY_NAME=$(getEntryName ${KERNEL} ${FSTYPE})
 
-# Set default
+cat <<EOF
 
-latest_kernel=$(version_find_latest ${KERNELS} | sed -e "s,^[^0-9]*-,,g")
-
-if [ ${WANT_PARAGON_NTFS_EXPRESS_DRIVER} = 0 ]; then
-
-cat << EOF
-set default="Loopback (${latest_kernel} - \"${HOST_DEV_FSTYPE}\")"
-EOF
-
-  echo "Default loopback kernel will be \"${latest_kernel}\"." 1>&2
-fi
-
-# Adding entries
-
-for kernel in ${KERNELS}; do
-
-  KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
-  echo "Found loopback kernel \"${KERNEL}\" - \"${HOST_DEV_FSTYPE}\"." 1>&2
-
-cat << EOF
-
-menuentry 'Loopback (${KERNEL} - \"${HOST_DEV_FSTYPE}\")' --class gnu-linux --class gnu --class os {
+menuentry '${ENTRY_NAME}' --class gnu-linux --class gnu --class os {
   echo "Loading modules..."
 
   insmod xzio
@@ -41,65 +23,52 @@ menuentry 'Loopback (${KERNEL} - \"${HOST_DEV_FSTYPE}\")' --class gnu-linux --cl
 
   set root=${BOOT_PART}
 
-  linux  /vmlinuz-${KERNEL} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_host_fsoptions=${HOST_DEV_FSOPTIONS} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS}
+  linux  /vmlinuz-${KERNEL} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${FSTYPE} lvm_loops_host_fsoptions=${HOST_DEV_FSOPTIONS} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS}
 
   echo "Booting..."
   initrd /initrd.img-${KERNEL}
 }
 EOF
 
+}
+
+function getEntryName {
+  local KERNEL=$1
+  local FSTYPE=$2
+  local NAME_EXT=$3
+
+  echo "Buddy Linux${NAME_EXT} (${KERNEL}, ${FSTYPE})"
+}
+
+# Get kernels list
+
+KERNELS=$(for file in /boot/vmlinuz-* /vmlinuz-* /boot/kernel-* ; do
+  if grub_file_is_not_garbage "${file}" ; then echo -n "${file} " ; fi
+done)
+
+LATEST_KERNEL=$(version_find_latest ${KERNELS} | sed -e "s,^[^0-9]*-,,g")
+
+# Adding entries
+
+for kernel in ${KERNELS}; do
+  KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
+  addMenuEntry ${KERNEL} ${HOST_DEV_FSTYPE}
+  echo "Found Buddy Linux (${KERNEL}, ${HOST_DEV_FSTYPE})." 1>&2
+
+  PARAGON_FS=ufsd
+  PARAGON_DRIVER=/lib/modules/${KERNEL}/kernel/external/${PARAGON_FS}/${PARAGON_FS}.ko
+
+  if [ -f "${PARAGON_DRIVER}" ]; then
+    addMenuEntry ${KERNEL} ${PARAGON_FS} " / Paragon"
+    echo "Found Buddy Linux / Paragon (${KERNEL}, ${PARAGON_FS})." 1>&2
+  fi
 done
 
-# Loopback recovery
+# Set default
 
-if [ ${WANT_RECOVERY} = 1 ] && [ ${WANT_PARAGON_NTFS_EXPRESS_DRIVER} = 0 ]; then
+if [ -z "${GRUB_DEFAULT}" ]; then
+  DEFAULT_ENTRY=$(getEntryName ${LATEST_KERNEL} ${HOST_DEV_FSTYPE})
 
-echo "Adding loopback recovery kernel \"${latest_kernel}\"." 1>&2
-
-cat << EOF
-
-menuentry 'Loopback (Recovery - \"${HOST_DEV_FSTYPE}\")' --class gnu-linux --class gnu --class os {
-  echo "Loading modules..."
-
-  insmod xzio
-  insmod part_msdos
-
-  echo "Loading kernel \"${latest_kernel}\"..."
-
-  set root=${BOOT_PART}
-
-  linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_host_fsoptions=${HOST_DEV_FSOPTIONS} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} recovery nomodeset
-
-  echo "Booting recovery..."
-  initrd /initrd.img-${KERNEL}
-}
-EOF
-
-fi
-
-# Net console
-
-if [ ! -z "${NET_CONSOLE}" ] && [ ${WANT_PARAGON_NTFS_EXPRESS_DRIVER} = 0 ]; then
-
-echo "Adding loopback net console kernel \"${latest_kernel}\"." 1>&2
-
-cat << EOF
-
-menuentry 'Loopback (NetConsole - \"${HOST_DEV_FSTYPE}\")' --class gnu-linux --class gnu --class os {
-  echo "Loading modules..."
-
-  insmod xzio
-  insmod part_msdos
-
-  echo "Loading kernel \"${latest_kernel}\"..."
-
-  set root=${BOOT_PART}
-
-  linux  /vmlinuz-${latest_kernel} root=${ROOT_DEV} lvm_loops_host_dev=${HOST_DEV} lvm_loops_host_fstype=${HOST_DEV_FSTYPE} lvm_loops_host_fsoptions=${HOST_DEV_FSOPTIONS} lvm_loops_mask=${LVM_LOOPS_MASK} max_loop=${MAX_LOOPS} ${KERNEL_DEFAULTS} ${NET_CONSOLE}
-
-  echo "Booting with net console..."
-  initrd /initrd.img-${latest_kernel}
-}
-EOF
-
+  echo "default='${DEFAULT_ENTRY}'"
+  echo "Default kernel entry set to '${DEFAULT_ENTRY}'." 1>&2
 fi

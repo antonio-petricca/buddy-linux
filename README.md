@@ -210,7 +210,43 @@ $ sudo umount /media/my-2nd-boot-drive
 
 ### NTFS driver update
 
-I suggest you to keep [NTFS-3G driver](https://www.tuxera.com/community/open-source-ntfs-3g/) updated to the latest release (if you need it).
+I suggest you to keep the [NTFS-3G driver](https://www.tuxera.com/community/open-source-ntfs-3g/) updated to the latest release (if you need it).
+
+### Improve NTFS performances
+
+As you may know the **NTFS-3G** is a [FUSE](https://it.wikipedia.org/wiki/FUSE) driver, which is not the best in terms of performances (because of the calls from _User Space_ to _Kernel Space_).
+
+To improve your file NTFS file system access you should use a driver provided by [Paragon](https://www.paragon-software.com/home/ntfs-linux-professional) which ships a limited open source version of its commercial driver, but with some [limitations](https://www.paragon-software.com/home/ntfs-linux-professional/#comparison). This driver has been implemented as a true [Kernel Module](https://wiki.archlinux.org/index.php/Kernel_module).
+
+Due to its _non-commercial_ limitations, **Buddy Linux** now directly supports it by following this simple guide:
+
+```bash
+$ mkdir paragon-driver
+$ cd paragon-driver
+$ wget http://dl.paragon-software.com/free/Paragon-715-FRE_NTFS_Linux_9.5_Express.tar.gz
+
+...
+
+$ tar xvf Paragon-715-FRE_NTFS_Linux_9.5_Express.tar.gz
+
+...
+
+$ ./configure && make driver && sudo make driver_install
+
+$ sudo update-dracut # Adds the UFSD driver for the active kernel
+
+...
+
+$ sudo update-grub # Adds the Paragon driven entries to the Grub menù
+
+...
+
+$ sudo reboot
+```
+
+Don't forget that the above mentioned version compiles **only up to the kernel 4.12.x**.
+
+If you wish to embed the driver into other kernel versions, you have to boot into with the **ntfs-3g** driver and repeat the same procedure.
 
 ### Extend Logical Volume
 
