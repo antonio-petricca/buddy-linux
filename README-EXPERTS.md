@@ -1,5 +1,11 @@
 # Buddy Linux (Experts Guide)
 
+## Notice
+
+This guide file is **deprecated**.
+
+Please look at **install** script to know the detailed installation procedure.
+
 ## Introduction
 
 This guide will provide you detailed instructions, as an alternative to the automated **install** script on how to install Linux on a LVM loopback disk booting from an arbitrary device (grub and boot partition), like a USB drive, without have to write to your PC internal disk boot sector.

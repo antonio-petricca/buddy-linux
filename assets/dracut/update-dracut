@@ -3,6 +3,6 @@
 MODS_DIR=/lib/modules
 
 for MOD_DIR in $(ls -1 ${MODS_DIR}); do
-  (ls ${MODS_DIR}/${MOD_DIR}/modules.dep* 2>&1 1>/dev/null) && \
-  (/usr/bin/dracut -f /boot/initrd.img-${MOD_DIR} ${MOD_DIR} || exit $?)
+  ( ls ${MODS_DIR}/${MOD_DIR}/modules.dep* 2>&1 1>/dev/null ) && \
+  ( /usr/bin/dracut -f /boot/initrd.img-${MOD_DIR} ${MOD_DIR} || exit $? )
 done
