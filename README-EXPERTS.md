@@ -1,5 +1,11 @@
 # Buddy Linux (Experts Guide)
 
+## Notice
+
+This guide file is **deprecated**.
+
+Please look at **install** script to know the detailed installation procedure.
+
 ## Introduction
 
 This guide will provide you detailed instructions, as an alternative to the automated **install** script on how to install Linux on a LVM loopback disk booting from an arbitrary device (grub and boot partition), like a USB drive, without have to write to your PC internal disk boot sector.
@@ -227,6 +233,11 @@ In order to use the **boot-drive-backup** tool you have to prepare a fresh (USB)
 3. Syslog error "print_req_error:: I/O error, dev loop**X**, sector **X**": get logged only once on kernel 4.15.
 4. Swap file on loopback device causes a total system freeze on heavy memory load. After a lot of search and experimentation, the only workaround I have found is to create a standalone swap file hosted inside the same folder of the LVM loop files.
 5. In case of rollback from _Dracut_, **update-initramfs -u -k all** does not recognize all the installed kernels, so you have to update the missing ones by hand.
+6. During shutdown with Dracut you get many warnings from _dmraid_. Please ignore them
+
+### NTFS driver update
+
+I suggest you to keep [NTFS-3G driver](https://www.tuxera.com/community/open-source-ntfs-3g/) updated to the latest release.
 
 ## Some references
 
