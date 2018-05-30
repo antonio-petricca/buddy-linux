@@ -237,14 +237,14 @@ $ sudo update-dracut # Adds the UFSD driver for the active kernel
 
 ...
 
-$ sudo update-grub # Adds the Paragon driven entries to the Grub menù
+$ sudo update-grub # Adds the Paragon driver entries to the Grub menù
 
 ...
 
 $ sudo reboot
 ```
 
-Don't forget that the above mentioned version compiles **only up to the kernel 4.12.x**.
+Don't forget that the ntve mentioned version compiles **only up to the kernel 4.12.x**.
 
 If you wish to embed the driver into other kernel versions, you have to boot into with the **ntfs-3g** driver and repeat the same procedure.
 

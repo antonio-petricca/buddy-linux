@@ -5,11 +5,9 @@
 . /usr/share/grub/grub-mkconfig_lib
 
 function addMenuEntry {
-  local KERNEL=$1
-  local FSTYPE=$2
-  local NAME=$3
-
-  local ENTRY_NAME=$(getEntryName ${KERNEL} ${FSTYPE})
+  local ENTRY_NAME=$1
+  local KERNEL=$2
+  local FSTYPE=$3
 
 cat <<EOF
 
@@ -32,7 +30,7 @@ EOF
 
 }
 
-function getEntryName {
+function generateEntryName {
   local KERNEL=$1
   local FSTYPE=$2
   local NAME_EXT=$3
@@ -46,29 +44,40 @@ KERNELS=$(for file in /boot/vmlinuz-* /vmlinuz-* /boot/kernel-* ; do
   if grub_file_is_not_garbage "${file}" ; then echo -n "${file} " ; fi
 done)
 
+DEFAULT_ENTRY=""
+LAST_ENTRY=""
 LATEST_KERNEL=$(version_find_latest ${KERNELS} | sed -e "s,^[^0-9]*-,,g")
 
 # Adding entries
 
 for kernel in ${KERNELS}; do
   KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
-  addMenuEntry ${KERNEL} ${HOST_DEV_FSTYPE}
-  echo "Found Buddy Linux (${KERNEL}, ${HOST_DEV_FSTYPE})." 1>&2
+  LAST_ENTRY=$(generateEntryName ${KERNEL} ${HOST_DEV_FSTYPE})
+  addMenuEntry "${LAST_ENTRY}" ${KERNEL} ${HOST_DEV_FSTYPE}
+  echo "Found '${LAST_ENTRY}'." 1>&2
 
   PARAGON_FS=ufsd
   PARAGON_DRIVER=/lib/modules/${KERNEL}/kernel/external/${PARAGON_FS}/${PARAGON_FS}.ko
 
   if [ -f "${PARAGON_DRIVER}" ]; then
-    addMenuEntry ${KERNEL} ${PARAGON_FS} " / Paragon"
-    echo "Found Buddy Linux / Paragon (${KERNEL}, ${PARAGON_FS})." 1>&2
+    KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
+    LAST_ENTRY=$(generateEntryName ${KERNEL} ${PARAGON_FS} " / Paragon")
+    addMenuEntry "${LAST_ENTRY}" ${KERNEL} ${PARAGON_FS}
+    echo "Found '${LAST_ENTRY}'." 1>&2
+
+    if [ -z "${GRUB_DEFAULT}" ]; then
+      DEFAULT_ENTRY="${LAST_ENTRY}"
+    fi
   fi
 done
 
 # Set default
 
 if [ -z "${GRUB_DEFAULT}" ]; then
-  DEFAULT_ENTRY=$(getEntryName ${LATEST_KERNEL} ${HOST_DEV_FSTYPE})
+  if [ -z "${DEFAULT_ENTRY}" ]; then
+    DEFAULT_ENTRY=$(generateEntryName ${LATEST_KERNEL} ${HOST_DEV_FSTYPE})
+  fi
 
-  echo "default='${DEFAULT_ENTRY}'"
+  echo "set default='${DEFAULT_ENTRY}'"
   echo "Default kernel entry set to '${DEFAULT_ENTRY}'." 1>&2
 fi
