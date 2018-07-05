@@ -264,3 +264,7 @@ In order to do this you have to:
 - Add new files to the _Virtual Group_.
 - Extend the _Logical Volume_.
 - Reboot your **Buddy Linux**.
+
+## Known issues
+
+- Paragon driver not included in **initramfstools**.
