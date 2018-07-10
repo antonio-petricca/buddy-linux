@@ -80,7 +80,7 @@ function umountFolder {
     local FOLDER=$1
 
     if mountpoint -q ${FOLDER}; then
-        umount ${FOLDER} > /dev/null || exitInstall
+        umount -l ${FOLDER} > /dev/null || exitInstall
         printInfo " - Unmounted folder \"${FOLDER}\"."
     fi
 }
