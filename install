@@ -842,10 +842,11 @@ function doGrubConfiguration {
 
     if canRun; then
         local TMP_CONFIG=${LVM_DEFAULT_CONF}/grub
-        sed -i -r 's/GRUB_TIMEOUT=[0-9]+/GRUB_TIMEOUT=30/' ${TMP_CONFIG} || exitInstall
+        sed -ri 's/GRUB_TIMEOUT=[0-9]+/GRUB_TIMEOUT=30/' ${TMP_CONFIG} || exitInstall
+        sed -ri 's/^ *(GRUB_DEFAULT *=.+)/#\1/' ${TMP_CONFIG} || exitInstall
 
         if grep 'GRUB_TIMEOUT_STYLE' ${TMP_CONFIG} &> /dev/null; then
-            sed -i -r 's/GRUB_TIMEOUT_STYLE=.+/GRUB_TIMEOUT_STYLE="menu"/' ${TMP_CONFIG} || exitInstall
+            sed -ri 's/GRUB_TIMEOUT_STYLE=.+/GRUB_TIMEOUT_STYLE="menu"/' ${TMP_CONFIG} || exitInstall
         else
             echo -e "\nGRUB_TIMEOUT_STYLE=\"menu\"" >> ${TMP_CONFIG} || exitInstall
         fi
