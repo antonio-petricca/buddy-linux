@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.2] - 2018-07-09
 
-### Added
+### Changed
 
 - File **assets/dracut/20-buddy-linux.conf**.
+- Fixed Ubiquity restored point.
+- Moved to lazy umount (fix /target umount issue).
 
 ### Changed
 

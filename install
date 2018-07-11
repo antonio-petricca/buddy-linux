@@ -559,6 +559,8 @@ doSystemLoopFilesSetup
 function doLinuxDistributionInstallation {
     printPerforming
 
+    saveResumeCheckPoint
+
     if canRun; then
         {
             printInfo " Ubiquity will start shortly, so you have to enter on your own the following settings:\n"
@@ -576,17 +578,13 @@ function doLinuxDistributionInstallation {
 
         printInfo " Starting Ubiquity..."
         ubiquity || exitInstall
-    fi
 
-    saveResumeCheckPoint
-
-    if canRun; then
         printInfo "\n Ubiquity does not always reports a correct exit code, so: do you want to continue with installation (y/n)?"
         read -n 1 -r -s
         [[ $REPLY =~ ^[Yy]$ ]] || exitInstall
-    fi
 
-    saveResumeCheckPoint
+        saveResumeCheckPoint
+    fi
 
     canRun && umountFolder /target # Sometimes left by Ubiquity!
     saveResumeCheckPoint
