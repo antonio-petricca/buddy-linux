@@ -858,10 +858,12 @@ function doGrubConfiguration {
 
     if canRun; then
         local TMP_SOURCE=${CURRENT_DIR}/assets/grub/buddy-linux.cfg
-        local TMP_TARGET=${LVM_DEFAULT_CONF}/grub.d/buddy-linux.cfg
+        local TMP_GRUB_D=${LVM_DEFAULT_CONF}/grub.d
+        local TMP_TARGET=${TMP_GRUB_D}/buddy-linux.cfg
 
         {
-               cp ${TMP_SOURCE} ${TMP_TARGET} \
+               createFolder ${TMP_GRUB_D} \
+            && cp ${TMP_SOURCE} ${TMP_TARGET} \
             && sed -i -r "s:\{\{PARAM_HOST_UUID\}\}:${PARAM_HOST_UUID}:" ${TMP_TARGET} \
             && sed -i -r "s:\{\{PARAM_HOST_FSOPTIONS\}\}:${PARAM_HOST_FSOPTIONS}:" ${TMP_TARGET} \
             && sed -i -r "s:\{\{PARAM_HOST_FSTYPE\}\}:${PARAM_HOST_FSTYPE}:" ${TMP_TARGET} \
