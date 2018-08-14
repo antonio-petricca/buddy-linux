@@ -714,9 +714,13 @@ function doInitRdImageSetup_Dracut {
     saveResumeCheckPoint
 
     if canRun; then
-        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/dracut/update-dracut
+        local TMP_SCRIPT_BASENAME=update-dracut
+        local TMP_SCRIPT_NAME=${CURRENT_DIR}/assets/dracut/${TMP_SCRIPT_BASENAME}
         local TMP_FOLDER=${LVM_TARGET_MNT}/sbin/
-        cp ${TMP_SCRIPT_NAME} ${TMP_FOLDER}/ || exitInstall
+
+        cp ${TMP_SCRIPT_NAME} ${TMP_FOLDER}/ \
+        && chmod +x ${TMP_FOLDER}/${TMP_SCRIPT_BASENAME} \
+        || exitInstall
 
         printInfo " - Installed script \"${TMP_SCRIPT_NAME}\" into \"${TMP_FOLDER}\"."
     fi
