@@ -10,11 +10,20 @@ if [[ $EUID > 0 ]]; then # we can compare directly with this syntax.
   exit 1
 fi
 
-read -p "Are you sure? (CTRL-C to exit)"
-
 DEV=$1
 MNT=$2
 BAK=$3
+
+command -v parted > /dev/null || apt install -y parted || exit $?
+
+echo -e "Target device info:\n"
+parted ${DEV} print
+
+echo -e "Target mount point info:\n"
+ls ${MNT}
+
+echo ""
+read -p "Are you sure? (CTRL-C to exit)"
  
    grub-install --force --boot-directory=${MNT} ${DEV} \
 && cd ${MNT} \
