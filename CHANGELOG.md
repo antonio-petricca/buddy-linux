@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.5] - 2018-08-14
 
-
 ### Added
 
 - Print target device information before restoring boot device by script **boot-drive-restore**.
