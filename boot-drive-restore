@@ -14,6 +14,21 @@ DEV=$1
 MNT=$2
 BAK=$3
 
+[ -b ${DEV} ] || { 
+  echo "Invalid device \"${DEV}\"." >&2
+  exit 1 
+}
+
+mountpoint ${MNT} &>/dev/null || { 
+  echo "Invalid mount point \"${MNT}\"." >&2
+  exit 1 
+}
+
+[ -f ${BAK} ] || { 
+  echo "Invalid backup file \"${BAK}\"." >&2
+  exit 1 
+}
+
 command -v parted > /dev/null || apt install -y parted || exit $?
 
 echo -e "Target device info:\n"
