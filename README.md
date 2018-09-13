@@ -244,7 +244,7 @@ $ sudo update-grub # Adds the Paragon driver entries to the Grub menù
 $ sudo reboot
 ```
 
-Don't forget that the ntve mentioned version compiles **only up to the kernel 4.12.x**.
+Don't forget that the ntve mentioned version compiles **only up to the kernel 4.12.x**. If you want to install it on latest kernels, you have to address [my driver porting](https://www.paragon-software.com/home/ntfs-linux-professional/).
 
 If you wish to embed the driver into other kernel versions, you have to boot into with the **ntfs-3g** driver and repeat the same procedure.
 
