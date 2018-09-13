@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### None...
+
+## [1.1.6]
+
 ### Changed
 
 - Added device, backup file and mount point check on script **boot-drive-restore**.
@@ -99,6 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 [Unreleased]: https://github.com/antonio-petricca/buddy-linux/tree/develop
+[1.1.6]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.5...1.1.6
 [1.1.5]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.4...1.1.5
 [1.1.4]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.3...1.1.4
 [1.1.3]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.2...1.1.3

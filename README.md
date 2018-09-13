@@ -244,7 +244,7 @@ $ sudo update-grub # Adds the Paragon driver entries to the Grub menù
 $ sudo reboot
 ```
 
-Don't forget that the ntve mentioned version compiles **only up to the kernel 4.12.x**.
+Don't forget that the ntve mentioned version compiles **only up to the kernel 4.12.x**. If you want to install latest kernels, you have to address [my driver porting](github.com/antonio-petricca/paragon-ufsd-ntfs-driver-porting).
 
 If you wish to embed the driver into other kernel versions, you have to boot into with the **ntfs-3g** driver and repeat the same procedure.
 
