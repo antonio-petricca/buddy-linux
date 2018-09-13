@@ -63,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added suggestion about NTFG-3G driver update.
 - Added Dracut shutdown warning known issue.
-- Added support for [Paragon Express NTFS driver](https://www.paragon-software.com/home/ntfs-linux-professional/).
+- Added support for [Paragon Express NTFS driver](https://github.com/antonio-petricca/paragon-ufsd-ntfs-driver-porting).
 
 ## Changed
 

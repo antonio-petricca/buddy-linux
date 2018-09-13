@@ -22,7 +22,7 @@ You will be able to install your [Debian](https://www.debian.org/index.it.html) 
 
 ## Pre-requisites
 
-- Boot from a Live Debian or derived distribution.
+- Boot from a Live Ubuntu or derived distribution.
 - Insert a USB drive for bootloader, then umount it (if you want to boot from an external device).
 
 ## Clone repository
@@ -244,7 +244,7 @@ $ sudo update-grub # Adds the Paragon driver entries to the Grub menù
 $ sudo reboot
 ```
 
-Don't forget that the ntve mentioned version compiles **only up to the kernel 4.12.x**. If you want to install it on latest kernels, you have to address [my driver porting](https://www.paragon-software.com/home/ntfs-linux-professional/).
+Don't forget that the ntve mentioned version compiles **only up to the kernel 4.12.x**. If you want to install it on latest kernels, you have to address [my driver porting](https://github.com/antonio-petricca/paragon-ufsd-ntfs-driver-porting).
 
 If you wish to embed the driver into other kernel versions, you have to boot into with the **ntfs-3g** driver and repeat the same procedure.
 
