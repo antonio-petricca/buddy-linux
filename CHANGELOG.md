@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### None...
 
+## [1.1.7]
+
+### Added
+
+- Enabled [ZSwap](https://wiki.archlinux.org/index.php/Zswap) for default.
+
 ## [1.1.6]
 
 ### Changed
@@ -103,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 [Unreleased]: https://github.com/antonio-petricca/buddy-linux/tree/develop
+[1.1.6]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.6...1.1.7
 [1.1.6]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.5...1.1.6
 [1.1.5]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.4...1.1.5
 [1.1.4]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.3...1.1.4
