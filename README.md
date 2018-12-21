@@ -47,26 +47,27 @@ install [OPTIONS]
 
     Executive arguments:
 
-      -h | --help                 : this screen.
-      -c | --clean                : clean already performed steps.
-      -r | --resume               : resume execution from a given line number.
+      -h | --help                   : this screen.
+      -c | --clean                  : clean already performed steps.
+      -r | --resume                 : resume execution from a given line number.
 
     Mandatory arguments:
-****
-      -b | --boot-device          : boot (USB) device (eg: /dev/sdc).
-      -u | --host-uuid            : loop files host device UUID (got by blkid).
-      -f | --host-fs-type         : host device filesystem type (default: "ntfs-3g").
-      -s | --loopback-file-size   : loopback main file size (in Gigabytes).
-      -w | --swap-file-size       : swap file size (in Gigabytes).
+
+      -b | --boot-device            : boot (USB) device (eg: /dev/sdc).
+      -u | --host-uuid              : loop files host device UUID (got by blkid).
+      -f | --host-fs-type           : host device filesystem type (default: "ntfs-3g").
+      -s | --loopback-file-size     : loopback main file size (in Gigabytes).
+      -w | --swap-file-size         : swap file size (in Gigabytes).
 
     Optional arguments:
 
-      -p | --boot-partition-index : boot partition index (default: 1).
-      -i | --initrd-tool          : IniRD tools => 1 = initramfs-tools, 2 = dracut (default: 2).
-      -o | --host-fs-options      : host device filesystem options (default: "noatime").
-      -d | --loops-dir            : host device loopback files root relative folder (default: ".linux-loops").
-      -v | --volume-group-name    : volume group name (default: "vg_system").
-      -l | --logical-volume-name  : root logical volume name (default: "lv_root").
+      -g | --boot-device-grub-index : boot device grub index (eg: 0 for '(hd0,msdos1)'; default: 0).
+      -p | --boot-partition-index   : boot partition index (default: 1).
+      -i | --initrd-tool            : InitRD tools => 1 = initramfs-tools, 2 = dracut (default: 2).
+      -o | --host-fs-options        : host device filesystem options (default: "noatime").
+      -d | --loops-dir              : host device loopback files root relative folder (default: ".linux-loops").
+      -v | --volume-group-name      : volume group name (default: "vg_system").
+      -l | --logical-volume-name    : root logical volume name (default: "lv_root").
 ```
 
 ## An example is worth a thousand words
@@ -82,7 +83,7 @@ We have to gather some information to pass to install script, so...
 The host disk is the notebook internal drive partition where we want to create the (first) loopback file where we will install our Linux.
 
 ```bash
-$ blkid
+$ sudo blkid | grep -i ntfs
 
 /dev/sda1: LABEL="ESP" UUID="E00C-5421" TYPE="vfat" PARTLABEL="EFI system partition" PARTUUID="fb4ed2b9-80ee-4585-ba9a-98ad5fff9577"
 /dev/sda2: LABEL="DIAGS" UUID="6C3A-F782" TYPE="vfat" PARTLABEL="Basic data partition" PARTUUID="90215d40-b38b-4491-b8da-0aa0b1e49f22"
@@ -137,6 +138,7 @@ Is time to go...
 ```bash
 $ sudo ./install  \
   --host-uuid C69E53819E536947 \
+  --boot-device-grub-index 0 \
   --boot-device /dev/sdb \
   --boot-partition-index 1 \
   --host-fs-type ntfs-3g \
@@ -144,7 +146,7 @@ $ sudo ./install  \
   --swap-file-size 16
 ```
 
-Pay much attention to the Ubiquity step, then enjoy with your Linux setup!
+Pay much attention to the Ubiquity step and at parameter **--boot-device-grub-index** (which usually should left at default value, depending on your hardware layout), then enjoy with your Linux setup!
 
 ## Disaster recovery
 

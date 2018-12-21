@@ -99,6 +99,7 @@ PARAM_RESUME_LINENO=0
 PARAM_INITRD_TOOL=2
 
 PARAM_BOOT_DEV=
+PARAM_BOOT_DEV_GRUB_INDEX=0
 PARAM_BOOT_PART=1
 PARAM_HOST_UUID=
 PARAM_HOST_FSTYPE=ntfs-3g
@@ -114,24 +115,25 @@ function showHelp {
     printInfo "Synopsis:\n"
     printInfo "  $(basename $0) [OPTIONS]\n"
     printInfo "    Executive arguments:\n"
-    printInfo "      -h | --help                 : this screen."
-    printInfo "      -c | --clean                : clean already performed steps."
-    printInfo "      -r | --resume               : resume execution from a given line number."
+    printInfo "      -h | --help                   : this screen."
+    printInfo "      -c | --clean                  : clean already performed steps."
+    printInfo "      -r | --resume                 : resume execution from a given line number."
     printInfo ""
     printInfo "    Mandatory arguments:\n"
-    printInfo "      -b | --boot-device          : boot (USB) device (eg: /dev/sdc)."
-    printInfo "      -u | --host-uuid            : loop files host device UUID (got by blkid)."
-    printInfo "      -f | --host-fs-type         : host device filesystem type (default: \"${PARAM_HOST_FSTYPE}\")."
-    printInfo "      -s | --loopback-file-size   : loopback main file size (in Gigabytes)."
-    printInfo "      -w | --swap-file-size       : swap file size (in Gigabytes)."
+    printInfo "      -b | --boot-device            : boot (USB) device (eg: /dev/sdc)."
+    printInfo "      -u | --host-uuid              : loop files host device UUID (got by blkid)."
+    printInfo "      -f | --host-fs-type           : host device filesystem type (default: \"${PARAM_HOST_FSTYPE}\")."
+    printInfo "      -s | --loopback-file-size     : loopback main file size (in Gigabytes)."
+    printInfo "      -w | --swap-file-size         : swap file size (in Gigabytes)."
     printInfo ""
     printInfo "    Optional arguments:\n"
-    printInfo "      -p | --boot-partition-index : boot partition index (default: ${PARAM_BOOT_PART})."
-    printInfo "      -i | --initrd-tool          : IniRD tools => 1 = initramfs-tools, 2 = dracut (default: ${PARAM_INITRD_TOOL})."
-    printInfo "      -o | --host-fs-options      : host device filesystem options (default: \"${PARAM_HOST_FSOPTIONS}\")."
-    printInfo "      -d | --loops-dir            : host device loopback files root relative folder (default: \"${PARAM_LOOP_DIR}\")."
-    printInfo "      -v | --volume-group-name    : volume group name (default: \"${PARAM_LVM_VG}\")."
-    printInfo "      -l | --logical-volume-name  : root logical volume name (default: \"${PARAM_LVM_LV_ROOT}\")."
+    printInfo "      -g | --boot-device-grub-index : boot device grub index (eg: 0 for '(hd0,msdos1)'; default: ${PARAM_BOOT_DEV_GRUB_INDEX})."
+    printInfo "      -p | --boot-partition-index   : boot partition index (default: ${PARAM_BOOT_PART})."
+    printInfo "      -i | --initrd-tool            : InitRD tools => 1 = initramfs-tools, 2 = dracut (default: ${PARAM_INITRD_TOOL})."
+    printInfo "      -o | --host-fs-options        : host device filesystem options (default: \"${PARAM_HOST_FSOPTIONS}\")."
+    printInfo "      -d | --loops-dir              : host device loopback files root relative folder (default: \"${PARAM_LOOP_DIR}\")."
+    printInfo "      -v | --volume-group-name      : volume group name (default: \"${PARAM_LVM_VG}\")."
+    printInfo "      -l | --logical-volume-name    : root logical volume name (default: \"${PARAM_LVM_LV_ROOT}\")."
 }
 
 function parseOptions {
@@ -141,7 +143,7 @@ function parseOptions {
         exit 1
     fi
 
-    GET_OPT=$(getopt -o -hi::b::p::u::f::o::d::s::w::r::v::l::c --long help,initrd-tool::,boot-device::,boot-partition-index::,host-uuid::,host-fs-type::,host-fs-options::,loops-dir::,loopback-file-size::,swap-file-size::,resume::,volume-group-name,logical-volume-name,clean -- "$@" 2>&1 1>/dev/null)
+    GET_OPT=$(getopt -o -hi::b::p::u::f::g::o::d::s::w::r::v::l::c --long help,initrd-tool::,boot-device::,boot-device-grub-index::,boot-partition-index::,host-uuid::,host-fs-type::,host-fs-options::,loops-dir::,loopback-file-size::,swap-file-size::,resume::,volume-group-name,logical-volume-name,clean -- "$@" 2>&1 1>/dev/null)
     EXIT_CODE=$?
 
     if [ ${EXIT_CODE} != 0 ]; then
@@ -180,6 +182,11 @@ function parseOptions {
                     printError "Missing host UUID."
                     exit 1
                 fi
+            ;;
+
+            -g | --boot-device-grub-index )
+                PARAM_BOOT_DEV_GRUB_INDEX=$2
+                shift 2
             ;;
 
             -h | --help )
@@ -868,6 +875,8 @@ function doGrubConfiguration {
         {
                createFolder ${TMP_GRUB_D} \
             && cp ${TMP_SOURCE} ${TMP_TARGET} \
+            && sed -i -r "s:\{\{PARAM_BOOT_DEV_GRUB_INDEX\}\}:${PARAM_BOOT_DEV_GRUB_INDEX}:" ${TMP_TARGET} \
+            && sed -i -r "s:\{\{PARAM_BOOT_PART\}\}:${PARAM_BOOT_PART}:" ${TMP_TARGET} \
             && sed -i -r "s:\{\{PARAM_HOST_UUID\}\}:${PARAM_HOST_UUID}:" ${TMP_TARGET} \
             && sed -i -r "s:\{\{PARAM_HOST_FSOPTIONS\}\}:${PARAM_HOST_FSOPTIONS}:" ${TMP_TARGET} \
             && sed -i -r "s:\{\{PARAM_HOST_FSTYPE\}\}:${PARAM_HOST_FSTYPE}:" ${TMP_TARGET} \
