@@ -408,15 +408,15 @@ function askForConfirmation {
         set | grep -e "^PARAM_"
     } | boxes -d shell -i none
 
-    printInfo "\nDo you want to proceed (y/n)?"
-    read -n 1 -r -s
+    printInfo "\nDo you want to proceed (y/n)? "
+    read -r
     [[ $REPLY =~ ^[Yy]$ ]] || exit 2
 
     if [ ${PARAM_CLEAN} -eq 1 ]; then
         printInfo ""
         printInfo "Attention! You have chosen to clean all. Are you sure (y/n)?" | boxes -d shell -i none
 
-        read -n 1 -r -s
+        read -r
         [[ $REPLY =~ ^[Yy]$ ]] || exit 2
         printInfo ""
     fi
@@ -580,14 +580,14 @@ function doLinuxDistributionInstallation {
         } | boxes -d shell -i none
 
         printInfo "\n Do you want to proceed with Ubiquity (y/n)?"
-        read -n 1 -r -s
+        read -r
         [[ $REPLY =~ ^[Yy]$ ]] || exitInstall
 
         printInfo " Starting Ubiquity..."
         ubiquity || exitInstall
 
         printInfo "\n Ubiquity does not always reports a correct exit code, so: do you want to continue with installation (y/n)?"
-        read -n 1 -r -s
+        read -r
         [[ $REPLY =~ ^[Yy]$ ]] || exitInstall
 
         saveResumeCheckPoint

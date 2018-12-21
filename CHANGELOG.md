@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fixed **CHANGELOG.md** hyperlinks.
+- Message prompts now want ENTER to accept you choice.
 - Updated **README.md**.
 
 ## [1.1.7]
