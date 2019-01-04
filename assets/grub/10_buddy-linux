@@ -61,7 +61,7 @@ for kernel in ${KERNELS}; do
 
   if [ -f "${PARAGON_DRIVER}" ]; then
     KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
-    LAST_ENTRY=$(generateEntryName ${KERNEL} ${PARAGON_FS} " / Paragon")
+    LAST_ENTRY=$(generateEntryName ${KERNEL} "paragon-${PARAGON_FS}")
     addMenuEntry "${LAST_ENTRY}" ${KERNEL} ${PARAGON_FS}
     echo "Found '${LAST_ENTRY}'." 1>&2
 

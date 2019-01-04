@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### None...
 
+## [1.1.9]
+
+### Changed
+
+- Updated GRUB entry description for Paragon driver.
+
 ## [1.1.8]
 
 ### Added
@@ -121,6 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 [Unreleased]: https://github.com/antonio-petricca/buddy-linux/tree/develop
+[1.1.9]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.8...1.1.9
 [1.1.8]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.7...1.1.8
 [1.1.7]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.6...1.1.7
 [1.1.6]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.5...1.1.6
