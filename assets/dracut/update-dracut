@@ -43,7 +43,7 @@ function parseOptions {
 PARAM_CURRENT_ONLY=0
 parseOptions $@
 
-if [ ${PARAM_CLEAN} -eq 1 ]; then
+if [ ${PARAM_CURRENT_ONLY} -eq 1 ]; then
 
   CURRENT_KERNEL=$(uname -r)
   /usr/bin/dracut -f /boot/initrd.img-${CURRENT_KERNEL} ${CURRENT_KERNEL} || exit $?
