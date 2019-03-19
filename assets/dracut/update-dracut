@@ -1,8 +1,59 @@
 #!/bin/bash
 
-MODS_DIR=/lib/modules
+function printInfo {
+    echo -e "$@" >&1
+}
 
-for MOD_DIR in $(ls -1 ${MODS_DIR}); do
-  ( ls ${MODS_DIR}/${MOD_DIR}/modules.dep* 2>&1 1>/dev/null ) && \
-  ( /usr/bin/dracut -f /boot/initrd.img-${MOD_DIR} ${MOD_DIR} || exit $? )
-done
+function showHelp {
+    printInfo "Synopsis:\n"
+    printInfo "  $(basename $0) [OPTIONS]\n"
+    printInfo "    -h | --help         : this screen."
+    printInfo "    -c | --current-only : update only current kernel (else: all kernels)."
+}
+
+function parseOptions {
+    GET_OPT=$(getopt -o -hc --long help,current-only -- "$@" 2>&1 1>/dev/null)
+    EXIT_CODE=$?
+
+    if [ ${EXIT_CODE} != 0 ]; then
+        printError "Arguments parsing error(s):"
+        printError "$(echo "${GET_OPT}" | sed -e 's/getopt: / - /')"
+        exit $?
+    fi
+
+    while true; do
+        case "$1" in
+            -c | --current-only )
+                PARAM_CURRENT_ONLY=1
+                shift
+            ;;
+
+            -h | --help )
+                showHelp
+                exit 1
+            ;;
+
+            * )
+            break
+            ;;
+        esac
+    done
+}
+
+PARAM_CURRENT_ONLY=0
+parseOptions $@
+
+if [ ${PARAM_CLEAN} -eq 1 ]; then
+
+  CURRENT_KERNEL=$(uname -r)
+  /usr/bin/dracut -f /boot/initrd.img-${CURRENT_KERNEL} ${CURRENT_KERNEL} || exit $?
+
+else
+  MODS_DIR=/lib/modules
+
+  for MOD_DIR in $(ls -1 ${MODS_DIR}); do
+    ( ls ${MODS_DIR}/${MOD_DIR}/modules.dep* 2>&1 1>/dev/null ) && \
+    ( /usr/bin/dracut -f /boot/initrd.img-${MOD_DIR} ${MOD_DIR} || exit $? )
+  done
+
+fi
