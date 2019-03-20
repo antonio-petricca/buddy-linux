@@ -180,7 +180,7 @@ mount --bind /sys ${LVM_TARGET_MNT}/sys
 mount --bind /proc ${LVM_TARGET_MNT}/proc
 mount --bind ${BOOT_MNT} ${LVM_TARGET_MNT}/boot
 
-chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub
+chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub --all
 
 umount ${LVM_TARGET_MNT}/dev/pts
 umount ${LVM_TARGET_MNT}/dev

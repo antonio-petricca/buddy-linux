@@ -134,10 +134,10 @@ function showHelp {
     printInfo "      -d | --loops-dir              : host device loopback files root relative folder (default: \"${PARAM_LOOP_DIR}\")."
     printInfo "      -v | --volume-group-name      : volume group name (default: \"${PARAM_LVM_VG}\")."
     printInfo "      -l | --logical-volume-name    : root logical volume name (default: \"${PARAM_LVM_LV_ROOT}\")."
+    printInfo ""
 }
 
 function parseOptions {
-
     if [ $# -eq 0 ]; then
         showHelp
         exit 1
@@ -919,7 +919,7 @@ function doGrubConfiguration {
 
     if canRun; then
         printInfo " - Updating Grub..."
-        chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub || exitInstall
+        chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub --all || exitInstall
         printInfo " - Updated Grub."
     fi
 

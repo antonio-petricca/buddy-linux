@@ -1,5 +1,9 @@
 #!/bin/bash
 
+function printError {
+    echo -e "$@" >&2
+}
+
 function printInfo {
     echo -e "$@" >&1
 }
@@ -7,12 +11,13 @@ function printInfo {
 function showHelp {
     printInfo "Synopsis:\n"
     printInfo "  $(basename $0) [OPTIONS]\n"
-    printInfo "    -h | --help         : this screen."
-    printInfo "    -c | --current-only : update only current kernel (else: all kernels)."
+    printInfo "    -h | --help  this screen."
+    printInfo "    -a | --all  : update all kernel (else: only current kernel)."
+    printInfo ""
 }
 
 function parseOptions {
-    GET_OPT=$(getopt -o -hc --long help,current-only -- "$@" 2>&1 1>/dev/null)
+    GET_OPT=$(getopt -o -ha --long help,all -- "$@" 2>&1 1>/dev/null)
     EXIT_CODE=$?
 
     if [ ${EXIT_CODE} != 0 ]; then
@@ -23,8 +28,8 @@ function parseOptions {
 
     while true; do
         case "$1" in
-            -c | --current-only )
-                PARAM_CURRENT_ONLY=1
+            -a | --all )
+                PARAM_CURRENT_ONLY=0
                 shift
             ;;
 
@@ -40,7 +45,7 @@ function parseOptions {
     done
 }
 
-PARAM_CURRENT_ONLY=0
+PARAM_CURRENT_ONLY=1
 parseOptions $@
 
 if [ ${PARAM_CURRENT_ONLY} -eq 1 ]; then
