@@ -919,7 +919,7 @@ function doGrubConfiguration {
 
     if canRun; then
         printInfo " - Updating Grub..."
-        chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub --all || exitInstall
+        chroot ${LVM_TARGET_MNT} /usr/sbin/update-grub || exitInstall
         printInfo " - Updated Grub."
     fi
 

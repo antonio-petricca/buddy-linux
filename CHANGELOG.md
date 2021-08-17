@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### None...
 
+## [1.1.12]
+
+### Changed
+
+- Removed to the **update-grub** script the *--all* switch.
 ## [1.1.11]
 
 ### Changed
@@ -145,6 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 [Unreleased]: https://github.com/antonio-petricca/buddy-linux/tree/develop
+[1.1.12]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.11...1.1.12
 [1.1.11]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.10...1.1.11
 [1.1.10]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.9...1.1.10
 [1.1.9]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.8...1.1.9
