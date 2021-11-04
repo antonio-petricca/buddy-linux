@@ -30,6 +30,20 @@ EOF
 
 }
 
+function addParagonMenuEntry {
+    kernel=$1
+    PARAGON_FS=$2
+
+    KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
+    LAST_ENTRY=$(generateEntryName ${KERNEL} "paragon-${PARAGON_FS}")
+    addMenuEntry "${LAST_ENTRY}" ${KERNEL} ${PARAGON_FS}
+    echo "Found (Paragon \"${PARAGON_FS}\") '${LAST_ENTRY}'." 1>&2
+
+    if [ -z "${GRUB_DEFAULT}" ]; then
+      DEFAULT_ENTRY="${LAST_ENTRY}"
+    fi
+}
+
 function generateEntryName {
   local KERNEL=$1
   local FSTYPE=$2
@@ -60,14 +74,14 @@ for kernel in ${KERNELS}; do
   PARAGON_DRIVER=/lib/modules/${KERNEL}/kernel/external/${PARAGON_FS}/${PARAGON_FS}.ko
 
   if [ -f "${PARAGON_DRIVER}" ]; then
-    KERNEL=$(basename $kernel | sed -e "s,^[^0-9]*-,,g")
-    LAST_ENTRY=$(generateEntryName ${KERNEL} "paragon-${PARAGON_FS}")
-    addMenuEntry "${LAST_ENTRY}" ${KERNEL} ${PARAGON_FS}
-    echo "Found '${LAST_ENTRY}'." 1>&2
+    addParagonMenuEntry ${kernel} ${PARAGON_FS}
+  fi
 
-    if [ -z "${GRUB_DEFAULT}" ]; then
-      DEFAULT_ENTRY="${LAST_ENTRY}"
-    fi
+  PARAGON_FS=ntfs3
+  PARAGON_DRIVER=/lib/modules/${KERNEL}/kernel/fs/${PARAGON_FS}/${PARAGON_FS}.ko
+
+  if [ -f "${PARAGON_DRIVER}" ]; then
+    addParagonMenuEntry ${kernel} ${PARAGON_FS}
   fi
 done
 
