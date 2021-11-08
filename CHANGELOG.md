@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### None...
 
+## [1.2.1]
+
+- Removed support for old Paragon UFSD driver (avoid **dracut** build errors).
+
 ## [1.2.0]
 
 - Added support for Paragon NTFS3 mainline driver.
@@ -155,6 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 [Unreleased]: https://github.com/antonio-petricca/buddy-linux/tree/develop
+[1.2.1]: https://github.com/antonio-petricca/buddy-linux/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.12...1.2.0
 [1.1.12]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.11...1.1.12
 [1.1.11]: https://github.com/antonio-petricca/buddy-linux/compare/1.1.10...1.1.11

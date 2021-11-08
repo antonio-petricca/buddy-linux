@@ -39,7 +39,7 @@ ls ${MNT}
 
 echo ""
 read -p "Are you sure? (CTRL-C to exit)"
- 
+
    grub-install --force --boot-directory=${MNT} ${DEV} \
 && cd ${MNT} \
 && rm -rf ${MNT}/* \
