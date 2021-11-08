@@ -147,7 +147,7 @@ cp -v assets/dracut/*.conf ${LVM_DRACUT_CONF}/
 cp -rv assets/dracut/90buddy-linux/ ${LVM_DRACUT_MODULES}/
 
 cp assets/dracut/update-dracut ${LVM_TARGET_MNT}/sbin/
-chroot ${LVM_TARGET_MNT} /sbin/update-dracut
+chroot ${LVM_TARGET_MNT} /sbin/update-dracut --all
 
 umount ${LVM_TARGET_MNT}/dev/pts
 umount ${LVM_TARGET_MNT}/dev

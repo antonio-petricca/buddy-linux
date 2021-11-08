@@ -736,7 +736,7 @@ function doInitRdImageSetup_Dracut {
 
     if canRun; then
         printInfo " - Updating InitRd image..."
-        chroot ${LVM_TARGET_MNT} /sbin/update-dracut || exitInstall
+        chroot ${LVM_TARGET_MNT} /sbin/update-dracut --all || exitInstall
         printInfo " - Updated InitRd image."
     fi
 

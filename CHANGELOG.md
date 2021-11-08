@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.1]
 
+- Improved script `/sbin/update-dracut` options.
 - Removed support for old Paragon UFSD driver (avoid **dracut** build errors).
 
 ## [1.2.0]
