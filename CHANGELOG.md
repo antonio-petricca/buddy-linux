@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improved script `/sbin/update-dracut` options.
 - Removed support for old Paragon UFSD driver (avoid **dracut** build errors).
+- Updated script `boot-drive-backup`, for performance reason, now generates `tar.gz` in place of `tar.xz`.
 
 ## [1.2.0]
 

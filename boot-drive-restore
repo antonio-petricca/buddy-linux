@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -lt 3 ]; then
-  echo "$(basename $0) [Boot device] [Boot partition mount point] [Boot image compress file name]"
+  echo "$(basename $0) [Boot device] [Boot partition mount point] [Boot image compressed file name]"
   exit 1
 fi
 
@@ -16,7 +16,7 @@ BAK=$3
 
 [ -b ${DEV} ] || { 
   echo "Invalid device \"${DEV}\"." >&2
-  exit 1 
+  exit 1
 }
 
 mountpoint ${MNT} &>/dev/null || { 
@@ -24,7 +24,7 @@ mountpoint ${MNT} &>/dev/null || {
   exit 1 
 }
 
-[ -f ${BAK} ] || { 
+[ -f ${BAK} ] || {
   echo "Invalid backup file \"${BAK}\"." >&2
   exit 1 
 }
