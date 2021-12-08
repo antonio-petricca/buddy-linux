@@ -634,7 +634,7 @@ function doSwapFileSetup {
 
     if canRun; then
         local TMP_SWAP_FILE=/host/${PARAM_LOOP_DIR}/${PARAM_SWAP_FILE}
-        echo -e "\n${TMP_SWAP_FILE}\tnone\tswap\tsw\t0\t0\n" >> ${LVM_TARGET_MNT}/etc/fstab || exitInstall
+        echo -e "\n${TMP_SWAP_FILE}\tnone\tswap\tsw,mode=600\t0\t0\n" >> ${LVM_TARGET_MNT}/etc/fstab || exitInstall
         printInfo " - Added swap file \"${TMP_SWAP_FILE}\" to target FSTAB file."
     fi
 
