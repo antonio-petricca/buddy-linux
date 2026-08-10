@@ -64,7 +64,7 @@ install [OPTIONS]
       -g | --boot-device-grub-index : boot device grub index (eg: 0 for '(hd0,msdos1)'; default: 0).
       -p | --boot-partition-index   : boot partition index (default: 1).
       -i | --initrd-tool            : InitRD tools => 1 = initramfs-tools, 2 = dracut (default: 2).
-      -o | --host-fs-options        : host device filesystem options (default: "noatime").
+      -o | --host-fs-options        : host device filesystem options (default: "noatime,rw").
       -d | --loops-dir              : host device loopback files root relative folder (default: ".linux-loops").
       -v | --volume-group-name      : volume group name (default: "vg_system").
       -l | --logical-volume-name    : root logical volume name (default: "lv_root").
